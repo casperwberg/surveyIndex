@@ -12,4 +12,4 @@ To install you need the DATRAS package
 
 Usage
 =====
-see example for the function **getSurveyIdx** (write ?getSurveyIdx in **R**
+see example for the function **getSurveyIdx** (write ?getSurveyIdx in **R**)
