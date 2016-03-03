@@ -5,11 +5,11 @@ Installation
 ============
 
 To install you need the DATRAS package
-install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
+     install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
 
-library(devtools)
-install_github("casperwberg/surveyIndex/surveyIndex")
+     library(devtools)
+     install_github("casperwberg/surveyIndex/surveyIndex")
 
 Usage
 =====
-see example for _getSurveyIdx_
+see example for the function **getSurveyIdx** (write ?getSurveyIdx in **R**
