@@ -42,7 +42,7 @@ function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
         lores  = apply(shipE,2, quantile,probs=0.025);
 
         tmp=cbind(colMeans(shipE),upres,lores);
-        rownames(tmp)<-pNam;
+        
         res[[a]]=tmp;
     }
     return(res);
