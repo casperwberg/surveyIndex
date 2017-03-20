@@ -102,11 +102,9 @@ getSurveyIdx <-
         yearNum=as.numeric(as.character(x$Year));
         yearRange=min(yearNum):max(yearNum);
 
+        ## Choose most frequent gear as reference gear
         gearNames=names(xtabs(~Gear,data=x[[2]]))
-        if("GOV" %in% gearNames) { myGear="GOV"; } else {
-           myGear=names(xtabs(~Gear,data=x[[2]]))[which.max(xtabs(~Gear,data=x[[2]]))]
-           cat("Notice: GOV gear not found. Standard gear chosen to be: ",myGear,"\n");
-        }
+        myGear=names(xtabs(~Gear,data=x[[2]]))[which.max(xtabs(~Gear,data=x[[2]]))]
         
         resMat=matrix(NA,nrow=length(yearRange),ncol=length(ages));
         upMat=resMat;
