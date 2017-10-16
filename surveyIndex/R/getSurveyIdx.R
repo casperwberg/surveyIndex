@@ -126,7 +126,7 @@ getSurveyIdx <-
                 f.pos = as.formula( paste( "log(A1) ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
-                print(system.time(tryCatch.W.E(m.pos<-gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP))$value));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP))$value));
 
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
