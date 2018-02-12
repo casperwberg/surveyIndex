@@ -68,14 +68,14 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     }
     
     if(any(select=="residuals")){
-      hist(residuals(x$pModels[[a]]),nclass=30)
+        hist(residuals(x$pModels[[a]]),nclass=30,main=paste("Residuals (pos only) age gr ",a),xlab="Residuals")
     }
     if(any(select=="fitVsRes")){
-      plot(fitted(x$pModels[[a]]),residuals(x$pModels[[a]]))
+      plot(fitted(x$pModels[[a]]),residuals(x$pModels[[a]]),xlab="Fitted",ylab="Residuals",main=paste("age gr ",a),...)
     }
 
     if(any(select=="resVsYear")){
-       plot(x$pData[[a]]$Year,residuals(x$pModels[[a]]))
+       plot(x$pData[[a]]$Year,residuals(x$pModels[[a]]),main=paste("age gr ",a),xlab="Year",ylab="Residuals",...)
     }
   }
 
