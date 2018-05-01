@@ -35,8 +35,8 @@ function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
         brp.0=mvrnorm(n=nboot,coef(x$zModels[[a]]),x$zModels[[a]]$Vp);
         ilogit<-function(x) 1/(1+exp(-x));
 
-        shipE = exp(brp.1[,shipSelP]);
-        if(!pOnly) shipE = shipE*ilogit(brp.0[,shipSelZ])
+        shipE = exp(brp.1[,shipSelP,drop=FALSE]);
+        if(!pOnly) shipE = shipE*ilogit(brp.0[,shipSelZ,drop=FALSE])
 
         upres  = apply(shipE,2, quantile,probs=0.975);
         lores  = apply(shipE,2, quantile,probs=0.025);
