@@ -3,7 +3,7 @@
 ##'
 ##' @title Survey index using the stratified mean method using ICES statistical rectangles as strata.
 ##' @param x DATRASraw object. Must contain a matrix: x[[2]]$Nage.
-##' ##' @param ageCols which columns of the Nage matrix should be included?
+##' @param ageCols which columns of the Nage matrix should be included?
 ##' @param doLog log-transform?
 ##' @return a matrix with survey indices
 ##' @export

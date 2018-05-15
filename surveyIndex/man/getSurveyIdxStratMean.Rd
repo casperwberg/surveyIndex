@@ -7,8 +7,9 @@
 getSurveyIdxStratMean(x, ageCols, doLog = FALSE)
 }
 \arguments{
-\item{x}{DATRASraw object. Must contain a matrix: x[[2]]$Nage.
-##' @param ageCols which columns of the Nage matrix should be included?}
+\item{x}{DATRASraw object. Must contain a matrix: x[[2]]$Nage.}
+
+\item{ageCols}{which columns of the Nage matrix should be included?}
 
 \item{doLog}{log-transform?}
 }
