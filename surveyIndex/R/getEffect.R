@@ -8,6 +8,7 @@
 ##' @param nboot see getSurveyIndex()
 ##' @param pOnly only calculate for positive part of model, defaults to FALSE.
 ##' @return list of estimates + ci bounds for each age group.
+##' @importFrom MASS mvrnorm
 ##' @export
 getEffect <-
 function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
@@ -29,7 +30,6 @@ function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
         if(length(shipSelP)!=length(shipSelZ)) { print("unequal number of ship effects"); }
 
         
-        library(MASS)
         brp.1=mvrnorm(n=nboot,coef(x$pModels[[a]]),x$pModels[[a]]$Vp);
         brp.0=mvrnorm(n=nboot,coef(x$zModels[[a]]),x$zModels[[a]]$Vp);
         ilogit<-function(x) 1/(1+exp(-x));

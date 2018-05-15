@@ -14,6 +14,8 @@ Depends:
     DATRAS,	
     mgcv,
     parallel
+Imports:
+    MASS
 Suggests:
     maps,
     mapdata	
