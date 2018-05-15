@@ -25,6 +25,7 @@
 ##' @author Casper W. Berg
 ##' @export
 ##' @examples
+##' \dontrun{
 ##' library(surveyIndex)
 ##' ##downloadExchange("NS-IBTS",1994:2014)
 ##' dAll<-readExchangeDir(".",strict=FALSE)
@@ -78,6 +79,7 @@
 ##' ## Calculate internal concistency and export to file
 ##' internalCons(SIQ1$idx)
 ##' exportSI(SIQ1$idx,ages=ages,years=levels(dd$Year),toy=mean(dd$timeOfYear),file="out.dat",nam="Survey index demo example")
+##' }
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=2,method="ML",predD=NULL,
              modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL

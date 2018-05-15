@@ -60,6 +60,7 @@ Berg et al. (2014): "Evaluation of alternative age-based methods for estimating 
 Fisheries Research 151(2014) 91-99.
 }
 \examples{
+\dontrun{
 library(surveyIndex)
 ##downloadExchange("NS-IBTS",1994:2014)
 dAll<-readExchangeDir(".",strict=FALSE)
@@ -113,6 +114,7 @@ surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),l
 ## Calculate internal concistency and export to file
 internalCons(SIQ1$idx)
 exportSI(SIQ1$idx,ages=ages,years=levels(dd$Year),toy=mean(dd$timeOfYear),file="out.dat",nam="Survey index demo example")
+}
 }
 \author{
 Casper W. Berg
