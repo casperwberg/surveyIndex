@@ -25,6 +25,3 @@ nothing
 \description{
 Write survey index to file in standard XSA/SAM format
 }
-\details{
-.. content for \details{} ..
-}

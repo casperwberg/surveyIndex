@@ -1,6 +1,5 @@
 ##' Write survey index to file in standard XSA/SAM format
 ##'
-##' .. content for \details{} ..
 ##' @title Write survey index to file in standard XSA/SAM format
 ##' @param x matrix with survey indices
 ##' @param ages vector of ages

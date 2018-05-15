@@ -1,6 +1,5 @@
 ##' Calculate confidence intervals for a named parameter in a survey index model.
 ##'
-##' .. content for \details{} ..
 ##' @title Calculate confidence intervals for a named parameter in a survey index model.
 ##' @param x survey index
 ##' @param dat DATRASraw object

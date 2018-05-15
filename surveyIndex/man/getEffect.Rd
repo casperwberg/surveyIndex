@@ -25,6 +25,3 @@ list of estimates + ci bounds for each age group.
 \description{
 Calculate confidence intervals for a named parameter in a survey index model.
 }
-\details{
-.. content for \details{} ..
-}
