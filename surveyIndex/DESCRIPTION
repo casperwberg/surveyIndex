@@ -17,4 +17,4 @@ Depends:
 Suggests:
     maps,
     mapdata	
-
+RoxygenNote: 6.0.1
