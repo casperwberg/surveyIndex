@@ -14,7 +14,9 @@ Depends:
     DATRAS,	
     mgcv,
     parallel
+Imports:
+    MASS
 Suggests:
     maps,
     mapdata	
-
+RoxygenNote: 6.0.1

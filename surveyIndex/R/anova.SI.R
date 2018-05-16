@@ -4,7 +4,7 @@
 ##' @param m1 
 ##' @param m2 
 ##' @return A p-value.
-##' @export
+##' @export anova.SI
 anova.SI <-
 function(m1,m2){
   ll1=m1$logLik
