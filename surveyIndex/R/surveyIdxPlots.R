@@ -13,10 +13,12 @@
 ##' @param plotByAge boolean (default=TRUE). If true, par(par) is called for each age group.
 ##' @param legend boolean (default=TRUE). add legends to plot?
 ##' @param predD DATRASraw object with grid (optional). Overrides 'myids' if supplied.
+##' @param year numeric (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). 
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
+##' @export 
 surveyIdxPlots <-
-function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map","residuals","fitVsRes"),par=list(mfrow=c(3,3)),colors=rev(gray.colors(5)),map.cex=1,plotByAge=TRUE,legend=TRUE,predD=NULL,...){
+function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map","residuals","fitVsRes"),par=list(mfrow=c(3,3)),colors=rev(gray.colors(5)),map.cex=1,plotByAge=TRUE,legend=TRUE,predD=NULL,year=NULL,...){
 
   if(!plotByAge) par(par)
   for(a in cols){
@@ -50,11 +52,14 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
         ylims=range(dat$lat,na.rm=TRUE)
       if(is.null(predD)){ tmp=subset(dat,haul.id %in% myids) } else {tmp=predD;}
       
-      concT = concTransform(log(x$gPreds[[a]]));
+      if(is.null(year)) { concT = concTransform(log(x$gPreds[[a]])) }  else {
+                        y = which( as.numeric(as.character(levels(dat$Year)))==year)                                                
+                        concT = concTransform(log(x$gPreds2[[a]][[y]]))
+                     }
       if(length(colors)>1) zFac=cut( concT,0:length(colors)/length(colors)) else zFac=1;
       if(length(map.cex)>1) sFac=cut(log(x$gPreds[[a]]),length(map.cex)) else sFac=1;
       myCols=colors;
-      plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex[sFac],xlim=xlims,ylim=ylims,xlab="Longitude",ylab="Latitude",main=paste("Age group",a),...)
+      plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex[sFac],xlim=xlims,ylim=ylims,xlab="Longitude",ylab="Latitude",main=paste("Age group",a,year),...)
       points(tmp$lon,y=tmp$lat,col=myCols[zFac],pch=16,cex=map.cex[sFac]-0.05)
       
       map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))

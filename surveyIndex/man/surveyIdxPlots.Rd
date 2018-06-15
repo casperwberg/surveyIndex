@@ -7,7 +7,7 @@
 surveyIdxPlots(x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels),
   select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow =
   c(3, 3)), colors = rev(gray.colors(5)), map.cex = 1, plotByAge = TRUE,
-  legend = TRUE, predD = NULL, ...)
+  legend = TRUE, predD = NULL, year = NULL, ...)
 }
 \arguments{
 \item{x}{Survey index as produced by getSurveyIndex()}
@@ -33,6 +33,8 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels),
 \item{legend}{boolean (default=TRUE). add legends to plot?}
 
 \item{predD}{DATRASraw object with grid (optional). Overrides 'myids' if supplied.}
+
+\item{year}{numeric (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects).}
 
 \item{...}{Additional parameters for plot()}
 }
