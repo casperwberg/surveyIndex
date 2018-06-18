@@ -1,3 +1,12 @@
+##' Calculate external consistencies between two survey indices.
+##'
+##' Proper alignment of years and ages must be ensured by the user.
+##' @title Calculate external consistencies between two survey indices.
+##' @param tt A matrix with survey indices (rows=years, cols=ages)
+##' @param tt2 A matrix with survey indices (rows=years, cols=ages)
+##' @param do.plot plot it?
+##' @return A vector of correlations (consistencies)
+##' @export
 externalCons <-
 function(tt,tt2,do.plot=FALSE){
   tt[tt==0]=NA
