@@ -2,6 +2,7 @@
 
 export(anova.SI)
 export(exportSI)
+export(externalCons)
 export(fixAgeGroup)
 export(getEffect)
 export(getGrid)
