@@ -27,8 +27,9 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     if(any(select=="index")){
       ys=range(as.numeric(levels(dat$Year)));
       ys=ys[1]:ys[2]
-      if(!is.null(alt.idx) && a<=ncol(alt.idx)) { plot(ys,alt.idx[,a]/mean(alt.idx[,a],na.rm=TRUE),ylim=c(0,5),col=2,ylab="Index",xlab="Year",main=paste("Age group",a)) } else {
-        plot(ys,rep(NA,length(ys)),ylim=c(0,5),col=2,ylab="Index",xlab="Year",main=paste("Age group",a))
+      yl=range( c(alt.idx[,a]/mean(alt.idx[,a]),x$idx[,a]/mean(x$idx[,a],0) ) )*1.10
+      if(!is.null(alt.idx) && a<=ncol(alt.idx)) { plot(ys,alt.idx[,a]/mean(alt.idx[,a],na.rm=TRUE),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",a)) } else {
+        plot(ys,rep(NA,length(ys)),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",a))
       }
 
       idx=x$idx
