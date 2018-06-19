@@ -261,5 +261,7 @@ getSurveyIdx <-
         }
         getEdf<-function(m) sum(m$edf)
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
+        rownames(resMat)<-yearRange
+        colnames(resMat)<-ages
         list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,pData=pData,gPreds2=gPreds2);
     }

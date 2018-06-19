@@ -83,6 +83,10 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     if(any(select=="resVsYear")){
        plot(x$pData[[a]]$Year,residuals(x$pModels[[a]]),main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
     }
+
+    if(any(select=="resVsShip")){
+       plot(x$pData[[a]]$Ship,residuals(x$pModels[[a]]),main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
+    }
   }
 
 }
