@@ -86,13 +86,16 @@ getSurveyIdx <-
              modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL
              ){
         
-        
+        if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
+        if(is.null(colnames(x$Nage))) stop("No colnames found on 'Nage' matrix.");
         if(length(modelP)<length(ages)) stop(" length(modelP) < length(ages)");
         if(length(modelZ)<length(ages)) stop(" length(modelZ) < length(ages)");
         if(length(kvecP)<length(ages)) stop(" length(kvecP) < length(ages)");
         if(length(kvecZ)<length(ages)) stop(" length(kvecZ) < length(ages)");
         if(length(fam)<length(ages)) {famVec = rep(fam[1],length(ages)); warning("length of fam argument less than number of ages, only first element is used\n"); } else famVec=fam;
-        
+
+        dataAges <- as.numeric(gsub("[+]","",colnames(x$Nage)))
+        if(!all(ages%in%dataAges)) stop(paste0("age(s) ",setdiff(ages,dataAges)," not found in 'Nage' matrix"));
         x[[1]]$Year=as.factor(x[[1]]$Year);
         x[[2]]$Year=as.factor(x[[2]]$Year);
         pModels=list()
@@ -113,8 +116,9 @@ getSurveyIdx <-
         upMat=resMat;
         loMat=resMat;
         do.one.a<-function(a){
+            age = which(dataAges==ages[a])
             ddd=x[[2]]; ddd$dum=1.0;
-            ddd$A1=ddd$Nage[,a]
+            ddd$A1=ddd$Nage[,age]
             gammaPos=gamma;
             gammaZ=gamma;
             if(useBIC){
