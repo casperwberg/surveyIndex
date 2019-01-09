@@ -1,23 +1,23 @@
 ##' Calculate survey indices by age.
 ##'
 ##' This is based on the methods described in
-##' Berg et al. (2014): "Evaluation of alternative age-based methods for estimating relativeabundance from survey data in relation to assessment models",
+##' Berg et al. (2014): "Evaluation of alternative age-based methods for estimating relative abundance from survey data in relation to assessment models",
 ##' Fisheries Research 151(2014) 91-99.
 ##' @title Calculate survey indices by age.
 ##' @param x DATRASraw object
 ##' @param ages vector of ages
 ##' @param myids haul.ids for grid
 ##' @param kvecP vector with spatial smoother max. basis dimension for each age group, strictly positive part of model 
-##' @param kvecZ vector with spatial smoother max. basis dimension for each age group, presence/absence part of model 
+##' @param kvecZ vector with spatial smoother max. basis dimension for each age group, presence/absence part of model (ignored for Tweedie models) 
 ##' @param gamma model degress of freedom inflation factor (see 'gamma' argument to gam() ) 
 ##' @param cutOff treat observations below this value as zero
-##' @param fam distribution, either "Gamma" or "LogNormal".
+##' @param fam distribution, either "Gamma","LogNormal", or "Tweedie".
 ##' @param useBIC use BIC for smoothness selection (overrides 'gamma' argument)
 ##' @param nBoot number of bootstrap samples used for calculating index confidence intervals
 ##' @param mc.cores number of cores for parallel processing
 ##' @param method smoothness selection method used by 'gam'
 ##' @param predD optional DATRASraw object, defaults to NULL. If not null this is used as grid.
-##' @param modelZ vector of model formulae for presence/absence part, one pr. age group
+##' @param modelZ vector of model formulae for presence/absence part, one pr. age group (ignored for Tweedie models)
 ##' @param modelP vector of model formulae for strictly positive repsonses, one pr. age group
 ##' @param knotsP optional list of knots to gam, strictly positive repsonses
 ##' @param knotsZ optional list of knots to gam, presence/absence
@@ -89,9 +89,12 @@ getSurveyIdx <-
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
         if(is.null(colnames(x$Nage))) stop("No colnames found on 'Nage' matrix.");
         if(length(modelP)<length(ages)) stop(" length(modelP) < length(ages)");
-        if(length(modelZ)<length(ages)) stop(" length(modelZ) < length(ages)");
         if(length(kvecP)<length(ages)) stop(" length(kvecP) < length(ages)");
-        if(length(kvecZ)<length(ages)) stop(" length(kvecZ) < length(ages)");
+        if(fam[1]!="Tweedie"){ 
+            if(length(modelZ)<length(ages)) stop(" length(modelZ) < length(ages)");
+            if(length(kvecZ)<length(ages)) stop(" length(kvecZ) < length(ages)");
+        }
+        ## Add check for valid family names
         if(length(fam)<length(ages)) {famVec = rep(fam[1],length(ages)); warning("length of fam argument less than number of ages, only first element is used\n"); } else famVec=fam;
 
         dataAges <- as.numeric(gsub("[+]","",colnames(x$Nage)))
@@ -147,7 +150,7 @@ getSurveyIdx <-
                     stop("Error occured for age ", a, " in the binomial part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 
-            } else {
+            } else if(famVec[a]=="Gamma"){
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
@@ -164,15 +167,28 @@ getSurveyIdx <-
                     print(m0)
                     stop("Error occured for age ", a, " in the binomial part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
+            } else if(famVec[a]=="Tweedie"){
+                ddd$A1[ ddd$A1<cutOff ] = 0
+                f.pos = as.formula( paste( "A1 ~",modelP[a]));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP))$value));
+                if(class(m.pos)[2] == "error") {
+                    print(m.pos)
+                    stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
+                }
+                m0=NULL;
             }
             ## Calculate total log-likelihood
-            p0p =(1-predict(m0,type="response"))
-            ppos=p0p[ddd$A1>cutOff] 
-            p0m1=p0p[ddd$A1<=cutOff]
-            if(famVec[a]=="Gamma")  totll=sum(log(p0m1))+sum(log(1-ppos))+logLik(m.pos)[1];
-            ## if logNormal model, we must transform til log-likelihood to be able to use AIC
-            ## L(y) = prod( dnorm( log y_i, mu_i, sigma^2) * ( 1 / y_i ) ) => logLik(y) = sum( log[dnorm(log y_i, mu_i, sigma^2)]  - log( y_i ) )
-            if(famVec[a]=="LogNormal") totll=sum(log(p0m1))+ sum(log(1-ppos)) + logLik(m.pos)[1] - sum(m.pos$y);
+            if(famVec[a]=="Tweedie"){
+                totll = logLik(m.pos)[1]
+            } else {
+                p0p =(1-predict(m0,type="response"))
+                ppos=p0p[ddd$A1>cutOff] 
+                p0m1=p0p[ddd$A1<=cutOff]
+                if(famVec[a]=="Gamma")  totll=sum(log(p0m1))+sum(log(1-ppos))+logLik(m.pos)[1];
+                ## if logNormal model, we must transform til log-likelihood to be able to use AIC
+                ## L(y) = prod( dnorm( log y_i, mu_i, sigma^2) * ( 1 / y_i ) ) => logLik(y) = sum( log[dnorm(log y_i, mu_i, sigma^2)]  - log( y_i ) )
+                if(famVec[a]=="LogNormal") totll=sum(log(p0m1))+ sum(log(1-ppos)) + logLik(m.pos)[1] - sum(m.pos$y);
+            }
             
             if(is.null(predD)) predD=subset(ddd,haul.id %in% myids);
             res=numeric(length(yearRange));
@@ -198,9 +214,9 @@ getSurveyIdx <-
                 
                 predD$Gear=myGear;
                 p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
-                p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
+                if(famVec[a]!="Tweedie") p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
                 ## take care of failing predictions
-                if(!is.numeric(p.1) | !is.numeric(p.0)) {
+                if(!is.numeric(p.1) | (famVec[a]!="Tweedie" && !is.numeric(p.0))) {
                     res[which(as.character(yearRange)==y)]=0;
                     upres[which(as.character(yearRange)==y)] = 0;
                     lores[which(as.character(yearRange)==y)] = 0;
@@ -210,39 +226,46 @@ getSurveyIdx <-
                 
                 if(famVec[a]=="Gamma") { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
                 if(famVec[a]=="LogNormal")  { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
+                if(famVec[a]=="Tweedie")  { res[which(as.character(yearRange)==y)] = sum(exp(p.1)); gPred=exp(p.1) }
                 gp2[[y]]=gPred;
                 if(nBoot>10){
                     Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
-                    Xp.0=predict(m0,newdata=predD,type="lpmatrix");
                     brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
-                    brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
-                    ilogit<-function(x) 1/(1+exp(-x));
-
-                    
+                    if(famVec[a]!="Tweedie"){
+                        Xp.0=predict(m0,newdata=predD,type="lpmatrix");
+                        brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
+                        ilogit<-function(x) 1/(1+exp(-x));
+                        OS0 = matrix(0,nrow(predD),nBoot);
+                        terms.0=terms(m0)
+                        if(!is.null(m0$offset)){
+                            off.num.0 <- attr(terms.0, "offset")
+                            
+                            for (i in off.num.0) OS0 <- OS0 + eval(attr(terms.0, 
+                                                                        "variables")[[i + 1]], predD)
+                        }
+                        rep0=ilogit(Xp.0%*%t(brp.0)+OS0);
+                    }
                     OS.pos = matrix(0,nrow(predD),nBoot);
-                    OS0 = matrix(0,nrow(predD),nBoot);
                     terms.pos=terms(m.pos)
-                    terms.0=terms(m0)
                     if(!is.null(m.pos$offset)){
                         off.num.pos <- attr(terms.pos, "offset")
                         
                         for (i in off.num.pos) OS.pos <- OS.pos + eval(attr(terms.pos, 
                                                                             "variables")[[i + 1]], predD)
                     }
-                    if(!is.null(m0$offset)){
-                        off.num.0 <- attr(terms.0, "offset")
                         
-                        for (i in off.num.0) OS0 <- OS0 + eval(attr(terms.0, 
-                                                                    "variables")[[i + 1]], predD)
-                    }
                     
-                    rep0=ilogit(Xp.0%*%t(brp.0)+OS0);
                     if(famVec[a]=="LogNormal"){
                         rep1=exp(Xp.1%*%t(brp.1)+sig2/2+OS.pos);
                     } else {
                         rep1=exp(Xp.1%*%t(brp.1)+OS.pos);
+                    } 
+
+                    if(famVec[a]!="Tweedie"){
+                        idxSamp = colSums(rep0*rep1);
+                    } else {
+                        idxSamp = colSums(rep1);
                     }
-                    idxSamp = colSums(rep0*rep1);
                     upres[which(as.character(yearRange)==y)] = quantile(idxSamp,0.975);
                     lores[which(as.character(yearRange)==y)] = quantile(idxSamp,0.025);
                 }
