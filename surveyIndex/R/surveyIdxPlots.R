@@ -89,6 +89,20 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     if(any(select=="resVsShip")){
        plot(x$pData[[a]]$Ship,residuals(x$pModels[[a]]),main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
     }
+
+    if(any(select=="spatialResiduals")){
+        scale <- 3
+        if(is.null(year)) stop("a year must be supplied")
+        sel <- which(x$pData[[a]]$Year == as.character(year))
+        plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", xlab = "Longitude", ylab = "Latitude",main=paste("Age group",a,year))
+        map("worldHires", fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
+        resids = residuals(x$pModels[[a]])[sel]
+        positive = resids>0
+        points(x$pData[[a]]$lon[sel][positive], x$pData[[a]]$lat[sel][positive], pch = 16, cex = scale * sqrt(resids[positive]),col="blue")
+        points(x$pData[[a]]$lon[sel][!positive], x$pData[[a]]$lat[sel][!positive], pch = 16, cex = scale * sqrt(-resids[!positive]),col="red")
+        
+    }
+    
   }
 
 }
