@@ -16,7 +16,8 @@
 ##' @param year numeric (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). 
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
-##' @export 
+##' @export
+##' @import maps mapdata tweedie
 surveyIdxPlots <-
 function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map","residuals","fitVsRes"),par=list(mfrow=c(3,3)),colors=rev(gray.colors(5)),map.cex=1,plotByAge=TRUE,legend=TRUE,predD=NULL,year=NULL,...){
 
@@ -74,35 +75,67 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
             plot.gam(x$pModels[[a]],select=ss,main=paste("age gr",a),...);
         }
     }
+
+    if(any(select=="residuals") || any(select=="fitVsRes") || any(select=="resVsYear") || any(select=="spatialResiduals")){
+        if(pmatch("Tweedie",x$pModels[[a]]$family$family)==1){
+            require(tweedie)
+            resi <- qres.tweedie(x$pModels[[a]]);
+        } else {
+            resi <- residuals(x$pModels[[a]]);
+        }
+    }
     
     if(any(select=="residuals")){
-        hist(residuals(x$pModels[[a]]),nclass=30,main=paste("Residuals (pos only) age gr",a),xlab="Residuals")
+        hist(resi,nclass=30,main=paste("Residuals (pos only) age gr",a),xlab="Residuals")
     }
     if(any(select=="fitVsRes")){
-      plot(fitted(x$pModels[[a]]),residuals(x$pModels[[a]]),xlab="Fitted",ylab="Residuals",main=paste("age gr",a),...)
+      plot(fitted(x$pModels[[a]]),resi,xlab="Fitted",ylab="Residuals",main=paste("age gr",a),...)
     }
 
     if(any(select=="resVsYear")){
-       plot(x$pData[[a]]$Year,residuals(x$pModels[[a]]),main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
+       plot(x$pData[[a]]$Year,resi,main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
     }
 
     if(any(select=="resVsShip")){
-       plot(x$pData[[a]]$Ship,residuals(x$pModels[[a]]),main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
+       plot(x$pData[[a]]$Ship,resi,main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
     }
 
     if(any(select=="spatialResiduals")){
+        require(maps);
+        require(mapdata);
         scale <- 3
         if(is.null(year)) stop("a year must be supplied")
         sel <- which(x$pData[[a]]$Year == as.character(year))
         plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", xlab = "Longitude", ylab = "Latitude",main=paste("Age group",a,year))
         map("worldHires", fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
-        resids = residuals(x$pModels[[a]])[sel]
-        positive = resids>0
-        points(x$pData[[a]]$lon[sel][positive], x$pData[[a]]$lat[sel][positive], pch = 16, cex = scale * sqrt(resids[positive]),col="blue")
-        points(x$pData[[a]]$lon[sel][!positive], x$pData[[a]]$lat[sel][!positive], pch = 16, cex = scale * sqrt(-resids[!positive]),col="red")
+        
+        positive = resi>0
+        points(x$pData[[a]]$lon[sel][positive], x$pData[[a]]$lat[sel][positive], pch = 1, cex = scale * sqrt(resi[positive]),col="blue")
+        points(x$pData[[a]]$lon[sel][!positive], x$pData[[a]]$lat[sel][!positive], pch = 1, cex = scale * sqrt(-resi[!positive]),col="red")
         
     }
     
   }
 
+}
+
+
+qres.tweedie<-function (gam.obj, dispersion = NULL) 
+{
+    requireNamespace("tweedie")
+    mu <- fitted(gam.obj)
+    y <- gam.obj$y
+    df <- gam.obj$df.residual
+    w <- gam.obj$prior.weights
+    if (is.null(w)) 
+        w <- 1
+    p <- gam.obj$family$getTheta(TRUE)
+    if (is.null(dispersion)) 
+        dispersion <- sum((w * (y - mu)^2)/mu^p)/df
+    u <- tweedie::ptweedie(q = y, power = p, mu = fitted(gam.obj), 
+        phi = dispersion/w)
+    if (p > 1 && p < 2) 
+        u[y == 0] <- runif(sum(y == 0), min = 0, max = u[y == 
+            0])
+    qnorm(u)
 }

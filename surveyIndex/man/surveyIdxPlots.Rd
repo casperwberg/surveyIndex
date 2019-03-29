@@ -4,9 +4,10 @@
 \alias{surveyIdxPlots}
 \title{Visualize results from a survey index model fitted with getSurveyIdx().}
 \usage{
-surveyIdxPlots(x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels),
-  select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow =
-  c(3, 3)), colors = rev(gray.colors(5)), map.cex = 1, plotByAge = TRUE,
+surveyIdxPlots(x, dat, alt.idx = NULL, myids,
+  cols = 1:length(x$pModels), select = c("index", "map", "residuals",
+  "fitVsRes"), par = list(mfrow = c(3, 3)),
+  colors = rev(gray.colors(5)), map.cex = 1, plotByAge = TRUE,
   legend = TRUE, predD = NULL, year = NULL, ...)
 }
 \arguments{

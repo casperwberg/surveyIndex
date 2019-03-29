@@ -22,13 +22,13 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
 
 \item{kvecP}{vector with spatial smoother max. basis dimension for each age group, strictly positive part of model}
 
-\item{kvecZ}{vector with spatial smoother max. basis dimension for each age group, presence/absence part of model}
+\item{kvecZ}{vector with spatial smoother max. basis dimension for each age group, presence/absence part of model (ignored for Tweedie models)}
 
 \item{gamma}{model degress of freedom inflation factor (see 'gamma' argument to gam() )}
 
 \item{cutOff}{treat observations below this value as zero}
 
-\item{fam}{distribution, either "Gamma" or "LogNormal".}
+\item{fam}{distribution, either "Gamma","LogNormal", or "Tweedie".}
 
 \item{useBIC}{use BIC for smoothness selection (overrides 'gamma' argument)}
 
@@ -40,7 +40,7 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
 
 \item{predD}{optional DATRASraw object, defaults to NULL. If not null this is used as grid.}
 
-\item{modelZ}{vector of model formulae for presence/absence part, one pr. age group}
+\item{modelZ}{vector of model formulae for presence/absence part, one pr. age group (ignored for Tweedie models)}
 
 \item{modelP}{vector of model formulae for strictly positive repsonses, one pr. age group}
 
@@ -56,7 +56,7 @@ Calculate survey indices by age.
 }
 \details{
 This is based on the methods described in
-Berg et al. (2014): "Evaluation of alternative age-based methods for estimating relativeabundance from survey data in relation to assessment models",
+Berg et al. (2014): "Evaluation of alternative age-based methods for estimating relative abundance from survey data in relation to assessment models",
 Fisheries Research 151(2014) 91-99.
 }
 \examples{
