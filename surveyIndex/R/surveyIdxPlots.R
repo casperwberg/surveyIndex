@@ -57,8 +57,9 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
       if(is.null(predD)){ tmp=subset(dat,haul.id %in% myids) } else {tmp=predD;}
       
       if(is.null(year)) { concT = concTransform(log(x$gPreds[[a]])) }  else {
-                        y = which( as.numeric(as.character(levels(dat$Year)))==year)                                                
-                        concT = concTransform(log(x$gPreds2[[a]][[y]]))
+                           y = which( as.numeric(as.character(names(x$gPreds2[[a]])))==year)
+                           if(length(y)==0) stop(paste("Year",year, "age group",a,"not found."))
+                           concT = concTransform(log(x$gPreds2[[a]][[y]]))
                      }
       if(length(colors)>1) zFac=cut( concT,0:length(colors)/length(colors)) else zFac=1;
       if(length(map.cex)>1) sFac=cut(log(x$gPreds[[a]]),length(map.cex)) else sFac=1;
