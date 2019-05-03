@@ -77,8 +77,8 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
         }
     }
 
-    if(any(select=="residuals") || any(select=="fitVsRes") || any(select=="resVsYear") || any(select=="spatialResiduals")){
-        if(pmatch("Tweedie",x$pModels[[a]]$family$family)==1){
+    if(any(select=="residuals") || any(select=="fitVsRes") || any(select=="resVsYear") || any(select=="resVsShip") || any(select=="spatialResiduals")){
+        if(pmatch("Tweedie",x$pModels[[a]]$family$family,nomatch=-1)==1){
             require(tweedie)
             resi <- qres.tweedie(x$pModels[[a]]);
         } else {
