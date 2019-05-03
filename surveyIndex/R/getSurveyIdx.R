@@ -169,6 +169,7 @@ getSurveyIdx <-
                 }
             } else if(famVec[a]=="Tweedie"){
                 ddd$A1[ ddd$A1<cutOff ] = 0
+                pd = ddd
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
                 print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP))$value));
                 if(class(m.pos)[2] == "error") {
