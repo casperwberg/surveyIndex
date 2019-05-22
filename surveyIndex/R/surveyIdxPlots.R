@@ -50,8 +50,7 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     }
 
     if(any(select=="map")){
-        require(maps);
-        require(mapdata);
+        
         xlims=range(dat$lon,na.rm=TRUE)
         ylims=range(dat$lat,na.rm=TRUE)
       if(is.null(predD)){ tmp=subset(dat,haul.id %in% myids) } else {tmp=predD;}
@@ -66,8 +65,8 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
       myCols=colors;
       plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex[sFac],xlim=xlims,ylim=ylims,xlab="Longitude",ylab="Latitude",main=paste("Age group",a,year),...)
       points(tmp$lon,y=tmp$lat,col=myCols[zFac],pch=16,cex=map.cex[sFac]-0.05)
-      
-      map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
+      maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
+        
       if(legend) legend("topright",legend=levels(zFac),pch=16,col=colors,bg="white")
     }
     for(k in 1:length(select)){
@@ -79,7 +78,6 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
 
     if(any(select=="residuals") || any(select=="fitVsRes") || any(select=="resVsYear") || any(select=="resVsShip") || any(select=="spatialResiduals")){
         if(pmatch("Tweedie",x$pModels[[a]]$family$family,nomatch=-1)==1){
-            require(tweedie)
             resi <- qres.tweedie(x$pModels[[a]]);
         } else {
             resi <- residuals(x$pModels[[a]]);
@@ -102,13 +100,12 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     }
 
     if(any(select=="spatialResiduals")){
-        require(maps);
-        require(mapdata);
+  
         scale <- 3
         if(is.null(year)) stop("a year must be supplied")
         sel <- which(x$pData[[a]]$Year == as.character(year))
         plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", xlab = "Longitude", ylab = "Latitude",main=paste("Age group",a,year))
-        map("worldHires", fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
+        maps::map("worldHires", fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
         
         positive = resi>0
         points(x$pData[[a]]$lon[sel][positive], x$pData[[a]]$lat[sel][positive], pch = 1, cex = scale * sqrt(resi[positive]),col="blue")
@@ -120,8 +117,14 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
 
 }
 
-
-qres.tweedie<-function (gam.obj, dispersion = NULL) 
+##' Randomized quantile residuals for Tweedie models
+##'
+##' @title Randomized quantile residuals for Tweedie models
+##' @param gam.obj A gam object (mgcv package)
+##' @return A vector of residuals, which should be iid standard normal distributed
+##' @export
+##' @import tweedie
+qres.tweedie<-function (gam.obj) 
 {
     requireNamespace("tweedie")
     mu <- fitted(gam.obj)
@@ -131,8 +134,7 @@ qres.tweedie<-function (gam.obj, dispersion = NULL)
     if (is.null(w)) 
         w <- 1
     p <- gam.obj$family$getTheta(TRUE)
-    if (is.null(dispersion)) 
-        dispersion <- sum((w * (y - mu)^2)/mu^p)/df
+    dispersion <- gam.obj$scale
     u <- tweedie::ptweedie(q = y, power = p, mu = fitted(gam.obj), 
         phi = dispersion/w)
     if (p > 1 && p < 2) 

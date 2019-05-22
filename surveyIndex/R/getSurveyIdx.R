@@ -106,8 +106,7 @@ getSurveyIdx <-
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
         pData=list()
-        require(mgcv)
-        require(parallel)
+                
         yearNum=as.numeric(as.character(x$Year));
         yearRange=min(yearNum):max(yearNum);
 
@@ -274,7 +273,7 @@ getSurveyIdx <-
             list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2);
         }## end do.one
         noAges=length(ages);
-        rr=mclapply(1:noAges,do.one.a,mc.cores=mc.cores);
+        rr=parallel::mclapply(1:noAges,do.one.a,mc.cores=mc.cores);
         logl=0;
         for(a in 1:noAges){
             resMat[,a]=rr[[a]]$res;

@@ -1,7 +1,7 @@
 Package: surveyIndex
 Type: Package
 Title: Calculate survey indices by age from DATRAS exchange data.
-Version: 1.02
+Version: 1.03
 Date: 2018-05-03
 Author: Casper W. Berg
 Maintainer: Casper W. Berg <cbe@aqua.dtu.dk>
@@ -13,10 +13,10 @@ Depends:
     R (>= 3.0),
     DATRAS,	
     mgcv,
-    parallel
+    parallel,
+    maps,
+    mapdata
 Imports:
     MASS,
-    tweedie,	
-    maps,
-    mapdata	
+    tweedie	
 RoxygenNote: 6.1.1
