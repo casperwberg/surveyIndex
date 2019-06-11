@@ -176,9 +176,18 @@ getSurveyIdx <-
                     stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 m0=NULL;
+            } else if(famVec[a]=="negbin"){
+                pd = ddd
+                f.pos = as.formula( paste( "A1 ~",modelP[a]));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=nb,gamma=gammaPos,method=method,knots=knotsP))$value));
+                if(class(m.pos)[2] == "error") {
+                    print(m.pos)
+                    stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
+                }
+                m0=NULL;
             }
             ## Calculate total log-likelihood
-            if(famVec[a]=="Tweedie"){
+            if(famVec[a]=="Tweedie" || famVec[a]=="negbin"){
                 totll = logLik(m.pos)[1]
             } else {
                 p0p =(1-predict(m0,type="response"))
@@ -214,9 +223,9 @@ getSurveyIdx <-
                 
                 predD$Gear=myGear;
                 p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
-                if(famVec[a]!="Tweedie") p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
+                if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
                 ## take care of failing predictions
-                if(!is.numeric(p.1) | (famVec[a]!="Tweedie" && !is.numeric(p.0))) {
+                if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
                     res[which(as.character(yearRange)==y)]=0;
                     upres[which(as.character(yearRange)==y)] = 0;
                     lores[which(as.character(yearRange)==y)] = 0;
@@ -226,12 +235,12 @@ getSurveyIdx <-
                 
                 if(famVec[a]=="Gamma") { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
                 if(famVec[a]=="LogNormal")  { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
-                if(famVec[a]=="Tweedie")  { res[which(as.character(yearRange)==y)] = sum(exp(p.1)); gPred=exp(p.1) }
+                if(famVec[a] %in% c("Tweedie","negbin"))  { res[which(as.character(yearRange)==y)] = sum(exp(p.1)); gPred=exp(p.1) }
                 gp2[[y]]=gPred;
                 if(nBoot>10){
                     Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
                     brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
-                    if(famVec[a]!="Tweedie"){
+                    if(!famVec[a] %in% c("Tweedie","negbin")){
                         Xp.0=predict(m0,newdata=predD,type="lpmatrix");
                         brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
                         ilogit<-function(x) 1/(1+exp(-x));
@@ -261,7 +270,7 @@ getSurveyIdx <-
                         rep1=exp(Xp.1%*%t(brp.1)+OS.pos);
                     } 
 
-                    if(famVec[a]!="Tweedie"){
+                    if(!famVec[a] %in% c("Tweedie","negbin")){
                         idxSamp = colSums(rep0*rep1);
                     } else {
                         idxSamp = colSums(rep1);
