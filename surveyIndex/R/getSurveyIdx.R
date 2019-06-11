@@ -84,7 +84,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=2,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL)
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
