@@ -21,6 +21,7 @@
 ##' @param modelP vector of model formulae for strictly positive repsonses, one pr. age group
 ##' @param knotsP optional list of knots to gam, strictly positive repsonses
 ##' @param knotsZ optional list of knots to gam, presence/absence
+##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
 ##' @return A survey index (list)
 ##' @author Casper W. Berg
 ##' @examples
@@ -83,7 +84,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=2,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL)
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
@@ -220,8 +221,14 @@ getSurveyIdx <-
                 predD$Ship=names(which.max(summary(ddd$Ship)))
                 predD$timeOfYear=mean(ddd$timeOfYear);
                 predD$HaulDur=30.0
-                
                 predD$Gear=myGear;
+                if(!is.null(predfix)){ ##optional extra variables for standardization
+                    stopifnot(is.list(predfix))
+                    for(n in names(predfix)){
+                        predD[,n] = predfix[[n]]
+                    }
+                }
+
                 p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
                 if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
                 ## take care of failing predictions
