@@ -28,11 +28,11 @@ function(m1,m2){
 ##' @return numeric value
 ##' @export AIC.surveyIdx
 AIC.surveyIdx<-function(x, BIC=FALSE){
-    if(!BIC) 2*x$edfs-2*x$logLik else {
-         if(pmatch("Tweedie",x$pModels[[1]]$family$family,nomatch=-1)==1){
-             log(length(x$pModels[[1]]$y)*(length(x$pModels)))*x$edfs-2*x$logLik
-         } else {
+    if(!BIC) return(2*x$edfs-2*x$logLik)
+    if(pmatch("Tweedie",x$pModels[[1]]$family$family,nomatch=-1)==1 ||
+       pmatch("negbin",x$pModels[[1]]$family$family,nomatch=-1)==1 ){
+        log(length(x$pModels[[1]]$y)*(length(x$pModels)))*x$edfs-2*x$logLik
+    } else {
              log(length(x$zModels[[1]]$y)*(length(x$zModels)))*x$edfs-2*x$logLik
-         }
     }
 }
