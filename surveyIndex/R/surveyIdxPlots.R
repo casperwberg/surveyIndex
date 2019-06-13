@@ -21,9 +21,9 @@
 surveyIdxPlots <-
 function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map","residuals","fitVsRes"),par=list(mfrow=c(3,3)),colors=rev(gray.colors(5)),map.cex=1,plotByAge=TRUE,legend=TRUE,predD=NULL,year=NULL,...){
 
-  if(!plotByAge) par(par)
+  if(!plotByAge & !is.null(par)) par(par)
   for(a in cols){
-    if(plotByAge) par(par)
+    if(plotByAge & !is.null(par) ) par(par)
 
     if(any(select=="index")){
       ys=range(as.numeric(levels(dat$Year)));
