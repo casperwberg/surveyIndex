@@ -31,8 +31,8 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
       yl=range( c(x$idx[,a]/mean(x$idx[,a],0) ))*1.10
       if(!is.null(alt.idx) && a<=ncol(alt.idx)) {
           yl=range( c(alt.idx[,a]/mean(alt.idx[,a]),x$idx[,a]/mean(x$idx[,a],0) ) )*1.10
-          plot(ys,alt.idx[,a]/mean(alt.idx[,a],na.rm=TRUE),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",a)) } else {
-        plot(ys,rep(NA,length(ys)),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",a))
+          plot(ys,alt.idx[,a]/mean(alt.idx[,a],na.rm=TRUE),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",colnames(dat$Nage)[a])) } else {
+        plot(ys,rep(NA,length(ys)),ylim=yl,col=2,ylab="Index",xlab="Year",main=paste("Age group",colnames(dat$Nage)[a]))
       }
 
       idx=x$idx
@@ -63,7 +63,7 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
       if(length(colors)>1) zFac=cut( concT,0:length(colors)/length(colors)) else zFac=1;
       if(length(map.cex)>1) sFac=cut(log(x$gPreds[[a]]),length(map.cex)) else sFac=1;
       myCols=colors;
-      plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex[sFac],xlim=xlims,ylim=ylims,xlab="Longitude",ylab="Latitude",main=paste("Age group",a,year),...)
+      plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex[sFac],xlim=xlims,ylim=ylims,xlab="Longitude",ylab="Latitude",main=paste("Age group",colnames(dat$Nage)[a],year),...)
       points(tmp$lon,y=tmp$lat,col=myCols[zFac],pch=16,cex=map.cex[sFac]-0.05)
       maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
         
@@ -72,7 +72,7 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     for(k in 1:length(select)){
         ss = suppressWarnings(as.numeric(select[k]));
         if(!is.na(ss)){
-            plot.gam(x$pModels[[a]],select=ss,main=paste("age gr",a),...);
+            plot.gam(x$pModels[[a]],select=ss,main=paste("age gr",colnames(dat$Nage)[a]),...);
         }
     }
 
@@ -85,18 +85,18 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
     }
     
     if(any(select=="residuals")){
-        hist(resi,nclass=30,main=paste("Residuals (pos only) age gr",a),xlab="Residuals")
+        hist(resi,nclass=30,main=paste("Residuals (pos only) age gr",colnames(dat$Nage)[a]),xlab="Residuals")
     }
     if(any(select=="fitVsRes")){
-      plot(fitted(x$pModels[[a]]),resi,xlab="Fitted",ylab="Residuals",main=paste("age gr",a),...)
+      plot(fitted(x$pModels[[a]]),resi,xlab="Fitted",ylab="Residuals",main=paste("age gr",colnames(dat$Nage)[a]),...)
     }
 
     if(any(select=="resVsYear")){
-       plot(x$pData[[a]]$Year,resi,main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
+       plot(x$pData[[a]]$Year,resi,main=paste("age gr",colnames(dat$Nage)[a]),xlab="Year",ylab="Residuals",...)
     }
 
     if(any(select=="resVsShip")){
-       plot(x$pData[[a]]$Ship,resi,main=paste("age gr",a),xlab="Year",ylab="Residuals",...)
+       plot(x$pData[[a]]$Ship,resi,main=paste("age gr",colnames(dat$Nage)[a]),xlab="Year",ylab="Residuals",...)
     }
 
     if(any(select=="spatialResiduals")){
@@ -104,7 +104,7 @@ function(x,dat,alt.idx=NULL,myids,cols=1:length(x$pModels),select=c("index","map
         scale <- 3
         if(is.null(year)) stop("a year must be supplied")
         sel <- which(x$pData[[a]]$Year == as.character(year))
-        plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", xlab = "Longitude", ylab = "Latitude",main=paste("Age group",a,year))
+        plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", xlab = "Longitude", ylab = "Latitude",main=paste("Age group",colnames(dat$Nage)[a],year))
         maps::map("worldHires", fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
         
         positive = resi>0
