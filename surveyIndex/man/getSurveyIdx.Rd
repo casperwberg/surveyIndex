@@ -11,7 +11,7 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
   modelZ = rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
   length(ages)),
   modelP = rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
-  length(ages)), knotsP = NULL, knotsZ = NULL)
+  length(ages)), knotsP = NULL, knotsZ = NULL, predfix = NULL)
 }
 \arguments{
 \item{x}{DATRASraw object}
@@ -47,6 +47,8 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
 \item{knotsP}{optional list of knots to gam, strictly positive repsonses}
 
 \item{knotsZ}{optional list of knots to gam, presence/absence}
+
+\item{predfix}{optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)}
 }
 \value{
 A survey index (list)

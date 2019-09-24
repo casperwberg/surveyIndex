@@ -12,7 +12,7 @@ getGrid(dd, nLon = 20)
 \item{nLon}{number of grid cells in the longitude direction.}
 }
 \value{
-a list of coordinates and haul.ids.
+A surveyIndexGrid (a list of coordinates and haul.ids)
 }
 \description{
 Create a grid of haul positions from a DATRASraw object.
