@@ -24,7 +24,7 @@ function(dd,nLon=20){
   for(rec in uRecs)
     {
       k=k+1;
-      tmp=subset(dd,StatRec2==rec);
+      tmp=subset(dd[[2]],StatRec2==rec);
       mlon=mean(tmp$lon);
       mlat=mean(tmp$lat);
       dist=sqrt( (mlon-tmp$lon)^2+(mlat-tmp$lat)^2);
