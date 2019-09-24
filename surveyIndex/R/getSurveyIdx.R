@@ -22,8 +22,8 @@
 ##' @param knotsP optional list of knots to gam, strictly positive repsonses
 ##' @param knotsZ optional list of knots to gam, presence/absence
 ##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
+##' @param ... Optional extra arguments to "gam"
 ##' @return A survey index (list)
-##' @author Casper W. Berg
 ##' @examples
 ##' \dontrun{
 ##' library(surveyIndex)
@@ -84,7 +84,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=2,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL, ...
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
@@ -136,14 +136,14 @@ getSurveyIdx <-
                 f.pos = as.formula( paste( "log(A1) ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP))$value));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP,...))$value));
 
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, " in the positive part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 
-                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family="binomial",method=method,knots=knotsZ))$value));
+                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family="binomial",method=method,knots=knotsZ,...))$value));
 
                 if(class(m0)[2] == "error") {
                     print(m0)
@@ -154,14 +154,14 @@ getSurveyIdx <-
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),family=Gamma(link="log"),gamma=gammaPos,method=method,knots=knotsP))$value));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),family=Gamma(link="log"),gamma=gammaPos,method=method,knots=knotsP,...))$value));
 
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, " in the positive part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 
-                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family="binomial",method=method,knots=knotsZ))$value));
+                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family="binomial",method=method,knots=knotsZ,...))$value));
 
                 if(class(m0)[2] == "error") {
                     print(m0)
@@ -171,7 +171,7 @@ getSurveyIdx <-
                 ddd$A1[ ddd$A1<cutOff ] = 0
                 pd = ddd
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP))$value));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP,...))$value));
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
@@ -180,7 +180,7 @@ getSurveyIdx <-
             } else if(famVec[a]=="negbin"){
                 pd = ddd
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=nb,gamma=gammaPos,method=method,knots=knotsP))$value));
+                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=nb,gamma=gammaPos,method=method,knots=knotsP,...))$value));
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")

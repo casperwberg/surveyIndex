@@ -11,7 +11,7 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
   modelZ = rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
   length(ages)),
   modelP = rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
-  length(ages)), knotsP = NULL, knotsZ = NULL, predfix = NULL)
+  length(ages)), knotsP = NULL, knotsZ = NULL, predfix = NULL, ...)
 }
 \arguments{
 \item{x}{DATRASraw object}
@@ -49,6 +49,8 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
 \item{knotsZ}{optional list of knots to gam, presence/absence}
 
 \item{predfix}{optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)}
+
+\item{...}{Optional extra arguments to "gam"}
 }
 \value{
 A survey index (list)
@@ -117,7 +119,4 @@ surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),l
 internalCons(SIQ1$idx)
 exportSI(SIQ1$idx,ages=ages,years=levels(dd$Year),toy=mean(dd$timeOfYear),file="out.dat",nam="Survey index demo example")
 }
-}
-\author{
-Casper W. Berg
 }
