@@ -6,9 +6,8 @@ Installation
 
 To install you need the DATRAS package
 
-     install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
-     library(devtools)
-     install_github("casperwberg/surveyIndex/surveyIndex")
+     remotes::install_github("DTUAqua/DATRAS/DATRAS")
+     remotes::install_github("casperwberg/surveyIndex/surveyIndex")
 
 Usage
 =====
