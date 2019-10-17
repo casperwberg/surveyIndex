@@ -205,6 +205,7 @@ getSurveyIdx <-
             lores=res;
             upres=res;
             gp2=list()
+            
             for(y in levels(ddd$Year)){ 
                 ## take care of years with all zeroes
                 if(!any(ddd$A1[ddd$Year==y]>cutOff)){
@@ -354,14 +355,12 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
         lores=res;
         upres=res;
         gp2=list()
-        for(y in levels(ddd$Year)){
+        do.one.y<-function(y){
+            
                 cat("Doing year ",y,"\n")
                 ## take care of years with all zeroes
                 if(!any(ddd$A1[ddd$Year==y]>cutOff)){
-                    res[which(as.character(yearRange)==y)]=0;
-                    upres[which(as.character(yearRange)==y)] = 0;
-                    lores[which(as.character(yearRange)==y)] = 0;
-                    next;
+                    return(list(res=0,upres=0,lores=0,gp2=NULL))
                 }
 
                 ## OBS: effects that should be removed should be included here
@@ -383,17 +382,14 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
                 if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
                 ## take care of failing predictions
                 if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
-                    res[which(as.character(yearRange)==y)]=0;
-                    upres[which(as.character(yearRange)==y)] = 0;
-                    lores[which(as.character(yearRange)==y)] = 0;
-                    next;
+                    return(list(res=0,upres=0,lores=0,gp2=NULL))
                 }
                 sig2=m.pos$sig2;
+                idx = NA
+                if(famVec[a]=="Gamma") { idx <- sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
+                if(famVec[a]=="LogNormal")  { idx <- sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
+                if(famVec[a] %in% c("Tweedie","negbin"))  { idx <- sum(exp(p.1)); gPred=exp(p.1) }
                 
-                if(famVec[a]=="Gamma") { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
-                if(famVec[a]=="LogNormal")  { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
-                if(famVec[a] %in% c("Tweedie","negbin"))  { res[which(as.character(yearRange)==y)] = sum(exp(p.1)); gPred=exp(p.1) }
-                gp2[[y]]=gPred;
                 if(nBoot>10){
                     Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
                     brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
@@ -432,14 +428,22 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
                     } else {
                         idxSamp = colSums(rep1);
                     }
-                    upres[which(as.character(yearRange)==y)] = quantile(idxSamp,0.975);
-                    lores[which(as.character(yearRange)==y)] = quantile(idxSamp,0.025);
+                    
+                    return(list(res=idx,upres=quantile(idxSamp,0.975),lores=quantile(idxSamp,0.025),gp2=gPred))
                 }
-            } ## rof years
-            list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,gp2=gp2);
+        } ## rof years
+        yres = parallel::mclapply(levels(ddd$Year),do.one.y,mc.cores=mc.cores)
+        for(y in levels(ddd$Year)) {
+            ii = which(as.character(yearRange)==y) 
+            res[ii] = yres[[ii]]$res
+            upres[ii] = yres[[ii]]$upres
+            lores[ii] = yres[[ii]]$lores
+            gp2[[y]] = yres[[ii]]$gp2            
+        }
+        list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=tail(gp2,1),gp2=gp2);
         }## end do.one
         noAges=length(ages);
-        rr=parallel::mclapply(1:noAges,do.one.a,mc.cores=mc.cores);
+        rr=lapply(1:noAges,do.one.a);
         logl=0;
         for(a in 1:noAges){
             resMat[,a]=rr[[a]]$res;
