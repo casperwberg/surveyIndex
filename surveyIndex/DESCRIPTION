@@ -1,8 +1,8 @@
 Package: surveyIndex
 Type: Package
-Title: Calculate survey indices by age from DATRAS exchange data.
-Version: 1.03
-Date: 2018-05-03
+Title: Calculate survey indices of abundance from DATRAS exchange data.
+Version: 1.04
+Date: 2019-10-17
 Author: Casper W. Berg
 Maintainer: Casper W. Berg <cbe@aqua.dtu.dk>
 Description: This is an implementation of the methods described in
