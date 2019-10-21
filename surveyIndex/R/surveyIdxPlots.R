@@ -101,8 +101,10 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             if (legend){
                 maxcuts = aggregate(mapvals ~ zFac, FUN=max)
                 mincuts = aggregate(mapvals ~ zFac, FUN=min)
-                ## transform to kg/hour
-                leg = paste0("[",signif(mincuts[,2]/1000*2,legend.signif),",",signif(maxcuts[,2]/1000*2,legend.signif),"]")
+                mm = mean(mapvals)
+                ml = signif(mincuts[,2]/mm,legend.signif)
+                ml[1] = 0
+                leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
                 legend("topright", legend = leg, pch = 16, col = colors, bg = "white")
             }
         }
@@ -136,8 +138,10 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 if (legend && yy==year[1]){
                     maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
                     mincuts = aggregate(val ~ zFac, data=ally, FUN=min)
-                    ## transform to kg/hour
-                    leg = paste0("[",signif(mincuts[,2]/1000*2,legend.signif),",",signif(maxcuts[,2]/1000*2,legend.signif),"]")
+                    mm = mean(ally$val)
+                    ml = signif(mincuts[,2]/mm,legend.signif)
+                    ml[1] = 0
+                    leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
                     legend("topright", legend = leg, pch = 16, col = colors, bg = "white")
                 }
             }
