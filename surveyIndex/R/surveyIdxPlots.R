@@ -168,31 +168,31 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             hist(resi, nclass = 30, main = main, xlab = "Residuals")
         }
         if (any(select == "fitVsRes")) {
-            plot(fitted(x$pModels[[a]]), resi, xlab = "Fitted", 
-                ylab = "Residuals", main = main,...)
+            plot(fitted(x$pModels[[a]]), residuals(x$pModels[[a]]), xlab = "Fitted", 
+                ylab = "Residuals", main = main,...) ## TODO: use quantile residuals here too
         }
         if (any(select == "resVsYear")) {
-            plot(x$pData[[a]]$Year, resi, main = main, xlab = "Year", ylab = "Residuals", 
+            plot(dat$Year, resi, main = main, xlab = "Year", ylab = "Residuals", 
                 ...)
         }
         if (any(select == "resVsShip")) {
-            plot(x$pData[[a]]$Ship, resi, main = main, xlab = "Year", ylab = "Residuals", 
+            plot(dat$Ship, resi, main = main, xlab = "Year", ylab = "Residuals", 
                 ...)
         }
         if (any(select == "spatialResiduals")) {
             scale <- 3
             if (is.null(year)) 
                 stop("a year must be supplied")
-            sel <- which(x$pData[[a]]$Year == as.character(year))
-            plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", 
+            sel <- which(dat[[2]]$Year == as.character(year))
+            plot(dat$lon, dat$lat, type = "n", 
                 xlab = "Longitude", ylab = "Latitude", main = main,...)
             maps::map("worldHires", fill = TRUE, plot = TRUE, 
                 add = TRUE, col = grey(0.5))
             positive = resi > 0
-            points(x$pData[[a]]$lon[sel][positive], x$pData[[a]]$lat[sel][positive], 
+            points(dat$lon[sel][positive], dat$lat[sel][positive], 
                 pch = 1, cex = scale * sqrt(resi[positive]), 
                 col = "blue")
-            points(x$pData[[a]]$lon[sel][!positive], x$pData[[a]]$lat[sel][!positive], 
+            points(dat$lon[sel][!positive], dat$lat[sel][!positive], 
                 pch = 1, cex = scale * sqrt(-resi[!positive]), 
                 col = "red")
         }
