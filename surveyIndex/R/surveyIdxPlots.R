@@ -188,12 +188,12 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 xlab = "Longitude", ylab = "Latitude", main = main,...)
             maps::map("worldHires", fill = TRUE, plot = TRUE, 
                 add = TRUE, col = grey(0.5))
-            positive = resi > 0
+            positive = resi[sel] > 0
             points(dat$lon[sel][positive], dat$lat[sel][positive], 
-                pch = 1, cex = scale * sqrt(resi[positive]), 
+                pch = 1, cex = scale * sqrt(resi[sel][positive]), 
                 col = "blue")
             points(dat$lon[sel][!positive], dat$lat[sel][!positive], 
-                pch = 1, cex = scale * sqrt(-resi[!positive]), 
+                pch = 1, cex = scale * sqrt(-resi[sel][!positive]), 
                 col = "red")
         }
     }
