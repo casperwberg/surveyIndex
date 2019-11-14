@@ -95,7 +95,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 xlim = xlims, ylim = ylims, xlab = "Longitude", 
                 ylab = "Latitude", main = main, ...)
             points(tmp$lon, y = tmp$lat, col = myCols[zFac], 
-                pch = 16, cex = map.cex[sFac] - 0.05)
+                pch = 16, cex = map.cex[sFac])
             maps::map("worldHires", xlim = xlims, ylim = ylims, 
                 fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
             if (legend){
@@ -129,11 +129,11 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             ally$conc = surveyIndex:::concTransform(log(ally$val))
             ally$zFac=cut( ally$conc,0:length(colors)/length(colors))
             for(yy in year){
-                plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=1,xlab="Longitude",ylab="Latitude",axes=FALSE)
+                plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex,xlab="Longitude",ylab="Latitude",axes=FALSE)
                 box()
                 title(yy,line=1)
                 sel = which(ally$year==yy)
-                points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=16,cex=1)
+                points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=16,cex=map.cex)
                 maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
                 if (legend && yy==year[1]){
                     maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
@@ -155,13 +155,14 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
         if (any(select == "residuals") || any(select == "fitVsRes") || 
             any(select == "resVsYear") || any(select == "resVsShip") || 
             any(select == "spatialResiduals")) {
-            if (pmatch("Tweedie", x$pModels[[a]]$family$family, 
-                nomatch = -1) == 1) {
-                resi <- qres.tweedie(x$pModels[[a]])
-            }
-            else {
-                resi <- residuals(x$pModels[[a]])
-            }
+            ## if (pmatch("Tweedie", x$pModels[[a]]$family$family, 
+            ##     nomatch = -1) == 1) {
+            ##     resi <- qres.tweedie(x$pModels[[a]])
+            ## }
+            ## else {
+            ##     resi <- residuals(x$pModels[[a]])
+            ## }
+            resi <- residuals(x,a)
         }
         if (any(select == "residuals")) {
             hist(resi, nclass = 30, main = main, xlab = "Residuals")
@@ -184,8 +185,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 stop("a year must be supplied")
             sel <- which(x$pData[[a]]$Year == as.character(year))
             plot(x$pData[[a]]$lon, x$pData[[a]]$lat, type = "n", 
-                xlab = "Longitude", ylab = "Latitude", main = paste("Age group", 
-                  colnames(dat$Nage)[a], year))
+                xlab = "Longitude", ylab = "Latitude", main = main,...)
             maps::map("worldHires", fill = TRUE, plot = TRUE, 
                 add = TRUE, col = grey(0.5))
             positive = resi > 0
@@ -199,28 +199,3 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
     }
 }
 
-##' Randomized quantile residuals for Tweedie models
-##'
-##' @title Randomized quantile residuals for Tweedie models
-##' @param gam.obj A gam object (mgcv package)
-##' @return A vector of residuals, which should be iid standard normal distributed
-##' @export
-##' @import tweedie
-qres.tweedie<-function (gam.obj) 
-{
-    requireNamespace("tweedie")
-    mu <- fitted(gam.obj)
-    y <- gam.obj$y
-    df <- gam.obj$df.residual
-    w <- gam.obj$prior.weights
-    if (is.null(w)) 
-        w <- 1
-    p <- gam.obj$family$getTheta(TRUE)
-    dispersion <- gam.obj$scale
-    u <- tweedie::ptweedie(q = y, power = p, mu = fitted(gam.obj), 
-        phi = dispersion/w)
-    if (p > 1 && p < 2) 
-        u[y == 0] <- runif(sum(y == 0), min = 0, max = u[y == 
-            0])
-    qnorm(u)
-}

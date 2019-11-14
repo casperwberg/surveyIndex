@@ -7,8 +7,9 @@
 surveyIdxPlots(x, dat, alt.idx = NULL, myids,
   cols = 1:length(x$pModels), select = c("index", "map", "residuals",
   "fitVsRes"), par = list(mfrow = c(3, 3)),
-  colors = rev(gray.colors(5)), map.cex = 1, plotByAge = TRUE,
-  legend = TRUE, predD = NULL, year = NULL, ...)
+  colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE,
+  legend = TRUE, predD = NULL, year = NULL, main = NULL,
+  legend.signif = 3, ...)
 }
 \arguments{
 \item{x}{Survey index as produced by getSurveyIndex()}
@@ -21,7 +22,7 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
 
 \item{cols}{which age columns to consider?}
 
-\item{select}{character vector of chosen plots. Either one of "index","map","residuals", or "fitVsRes" or a number. Numbers refer to smooths in the order they appear in the formula.}
+\item{select}{character vector of chosen plots. Either one of "index","map","absolutemap","residuals","fitVsRes",""resVsYear","resVsShip","spatialResiduals", or a number. Numbers refer to smooths in the order they appear in the formula.}
 
 \item{par}{'par' settings for plotting (a named list).}
 
@@ -35,7 +36,11 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
 
 \item{predD}{DATRASraw object with grid (optional). Overrides 'myids' if supplied.}
 
-\item{year}{numeric (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects).}
+\item{year}{numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' year must be a vector.}
+
+\item{main}{optional main title (overrides default title)}
+
+\item{legend.signif}{Number of significant digits in map legends}
 
 \item{...}{Additional parameters for plot()}
 }
