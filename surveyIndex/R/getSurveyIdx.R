@@ -95,8 +95,9 @@ getSurveyIdx <-
             if(length(modelZ)<length(ages)) stop(" length(modelZ) < length(ages)");
             if(length(kvecZ)<length(ages)) stop(" length(kvecZ) < length(ages)");
         }
-        ## Add check for valid family names
-        if(length(fam)<length(ages)) {famVec = rep(fam[1],length(ages)); warning("length of fam argument less than number of ages, only first element is used\n"); } else famVec=fam;
+        ## check for valid family names
+        stopifnot(fam[1] %in% c("Gamma","LogNormal","Tweedie","negbin"))
+        if(length(fam)<length(ages)) { famVec = rep(fam[1],length(ages)) } else famVec=fam;
 
         dataAges <- as.numeric(gsub("[+]","",colnames(x$Nage)))
         if(!all(ages%in%dataAges)) stop(paste0("age(s) ",setdiff(ages,dataAges)," not found in 'Nage' matrix"));
@@ -307,7 +308,7 @@ getSurveyIdx <-
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
         rownames(resMat)<-yearRange
         colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,pData=pData,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear);
+        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,pData=pData,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ);
         class(out) <- "surveyIdx"
         out
     }
