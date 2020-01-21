@@ -28,6 +28,13 @@ retro.surveyIdx<-function(model, d, grid, npeels=5){
     
     ## Problem if grid includes points from "npeels" recent years...
     ## Solution: use "predD" for the grid
+    mp <- mz <- character(length(ages))
+    for(aa in 1:length(ages)){
+        mp[aa] = as.character(model$pModels[[aa]]$formula)[3]
+        if(length(model$zModels)>0){
+            mz[aa] = as.character(model$zModels[[aa]]$formula)[3]
+        } else { mz = NULL }
+    }
     res = list()
     for(i in 1:npeels){
     
@@ -37,7 +44,7 @@ retro.surveyIdx<-function(model, d, grid, npeels=5){
                       )
 
         cat("Peel ",i, ": re-fitting using years ",levels(curd$Year),"\n")
-        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0) 
+        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0,modelP=mp,modelZ=mz) 
     }
 
     class(res)<-"SIlist"
