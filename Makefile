@@ -7,6 +7,10 @@ DATE := $(shell sed -n '/^Date: /s///p' surveyIndex/DESCRIPTION)
 TARBALL=${PACKAGE}_${VERSION}.tar.gz
 ZIPFILE=${PACKAGE}_${VERSION}.zip
 
+SUBDIRS := $(wildcard testmore/*/.)
+
+.PHONY: all testmoreseq testonemore testmore $(SUBDIRS)
+
 all:
 	make doc-update
 	make build-package
@@ -54,3 +58,22 @@ changelog:
 	echo; \
 	git --no-pager log --format="o %B" `git describe --abbrev=0 --tags`..HEAD | sed s/^-/\ \ -/g
 
+NPROCS:=1
+OS:=$(shell uname -s)
+
+ifeq ($(OS),Linux)
+  NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
+endif
+
+testmore:
+	$(MAKE) -j $(NPROCS) testmoreseq
+
+testmoreseq: $(SUBDIRS)
+
+testonemore:
+	@$(MAKE) testmore/$(ARG)/.
+
+$(SUBDIRS):
+	@cp testmore/Makefile $@
+	@$(MAKE) -i -s -C $@
+	@rm -f $@/Makefile

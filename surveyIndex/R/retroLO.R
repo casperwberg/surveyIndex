@@ -6,8 +6,9 @@
 ##' @param grid surveyIndexGrid object (see getGrid) defining the grid.
 ##' @param npeels number of years to successively peel of the data set
 ##' @return SIlist (list of surveyIndex objects)
+##' @param ... Optional extra arguments to "gam"
 ##' @export
-retro.surveyIdx<-function(model, d, grid, npeels=5){
+retro.surveyIdx<-function(model, d, grid,npeels=5,...){
     predD = subset(d, haul.id %in% grid[[3]])
     predD = predD[[2]]
     ages = as.numeric(colnames(model$idx))
@@ -44,7 +45,7 @@ retro.surveyIdx<-function(model, d, grid, npeels=5){
                       )
 
         cat("Peel ",i, ": re-fitting using years ",levels(curd$Year),"\n")
-        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0,modelP=mp,modelZ=mz) 
+        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0,modelP=mp,modelZ=mz,...) 
     }
 
     class(res)<-"SIlist"
@@ -59,9 +60,10 @@ retro.surveyIdx<-function(model, d, grid, npeels=5){
 ##' @param d DATRASraw dataset
 ##' @param grid surveyIndexGrid object (see getGrid) defining the grid.
 ##' @param fac a factor in d to leave out one at a time, e.g. d$Survey
+##' @param ... Optional extra arguments to "gam"
 ##' @return SIlist (list of surveyIndex objects)
 ##' @export
-leaveout.surveyIdx<-function(model,d,grid,fac){
+leaveout.surveyIdx<-function(model,d,grid,fac,...){
     predD = subset(d, haul.id %in% grid[[3]])
     predD = predD[[2]]
     ages = as.numeric(colnames(model$idx))
@@ -78,7 +80,7 @@ leaveout.surveyIdx<-function(model,d,grid,fac){
         curd = d[ which(fac!=facc) ]
 
         cat("Re-fitting without",facc,"\n")
-        res[[facc]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0) 
+        res[[facc]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0,...) 
     }
 
     class(res)<-"SIlist"
