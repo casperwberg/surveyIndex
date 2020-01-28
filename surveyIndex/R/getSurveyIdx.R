@@ -108,7 +108,7 @@ getSurveyIdx <-
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
         pData=list()
-                
+        
         yearNum=as.numeric(as.character(x$Year));
         yearRange=min(yearNum):max(yearNum);
 
@@ -271,7 +271,7 @@ getSurveyIdx <-
                         for (i in off.num.pos) OS.pos <- OS.pos + eval(attr(terms.pos, 
                                                                             "variables")[[i + 1]], predD)
                     }
-                        
+                    
                     
                     if(famVec[a]=="LogNormal"){
                         rep1=exp(Xp.1%*%t(brp.1)+sig2/2+OS.pos);
@@ -332,7 +332,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
     dataAges <- model$dataAges
     famVec = model$family
     cutOff = model$cutOff
-        
+    
     yearNum=model$yearNum
     yearRange=min(yearNum):max(yearNum);
 
@@ -358,80 +358,80 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
         gp2=list()
         do.one.y<-function(y){
             
-                cat("Doing year ",y,"\n")
-                ## take care of years with all zeroes
-                if(!any(ddd$A1[ddd$Year==y]>cutOff)){
-                    return(list(res=0,upres=0,lores=0,gp2=NULL))
-                }
+            cat("Doing year ",y,"\n")
+            ## take care of years with all zeroes
+            if(!any(ddd$A1[ddd$Year==y]>cutOff)){
+                return(list(res=0,upres=0,lores=0,gp2=NULL))
+            }
 
-                ## OBS: effects that should be removed should be included here
-                predD$Year=y; predD$dum=0;
-                predD$ctime=as.numeric(as.character(y));
-                predD$TimeShotHour=mean(ddd$TimeShotHour)
-                predD$Ship=names(which.max(summary(ddd$Ship)))
-                predD$timeOfYear=mean(ddd$timeOfYear);
-                predD$HaulDur=30.0
-                predD$Gear=myGear;
-                if(!is.null(predfix)){ ##optional extra variables for standardization
-                    stopifnot(is.list(predfix))
-                    for(n in names(predfix)){
-                        predD[,n] = predfix[[n]]
+            ## OBS: effects that should be removed should be included here
+            predD$Year=y; predD$dum=0;
+            predD$ctime=as.numeric(as.character(y));
+            predD$TimeShotHour=mean(ddd$TimeShotHour)
+            predD$Ship=names(which.max(summary(ddd$Ship)))
+            predD$timeOfYear=mean(ddd$timeOfYear);
+            predD$HaulDur=30.0
+            predD$Gear=myGear;
+            if(!is.null(predfix)){ ##optional extra variables for standardization
+                stopifnot(is.list(predfix))
+                for(n in names(predfix)){
+                    predD[,n] = predfix[[n]]
+                }
+            }
+
+            p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
+            if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
+            ## take care of failing predictions
+            if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
+                return(list(res=0,upres=0,lores=0,gp2=NULL))
+            }
+            sig2=m.pos$sig2;
+            idx = NA
+            if(famVec[a]=="Gamma") { idx <- sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
+            if(famVec[a]=="LogNormal")  { idx <- sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
+            if(famVec[a] %in% c("Tweedie","negbin"))  { idx <- sum(exp(p.1)); gPred=exp(p.1) }
+            
+            if(nBoot>10){
+                Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
+                brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
+                if(!famVec[a] %in% c("Tweedie","negbin")){
+                    Xp.0=predict(m0,newdata=predD,type="lpmatrix");
+                    brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
+                    ilogit<-function(x) 1/(1+exp(-x));
+                    OS0 = matrix(0,nrow(predD),nBoot);
+                    terms.0=terms(m0)
+                    if(!is.null(m0$offset)){
+                        off.num.0 <- attr(terms.0, "offset")
+                        
+                        for (i in off.num.0) OS0 <- OS0 + eval(attr(terms.0, 
+                                                                    "variables")[[i + 1]], predD)
                     }
+                    rep0=ilogit(Xp.0%*%t(brp.0)+OS0);
                 }
-
-                p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
-                if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
-                ## take care of failing predictions
-                if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
-                    return(list(res=0,upres=0,lores=0,gp2=NULL))
-                }
-                sig2=m.pos$sig2;
-                idx = NA
-                if(famVec[a]=="Gamma") { idx <- sum(p.0*exp(p.1)); gPred=p.0*exp(p.1) }
-                if(famVec[a]=="LogNormal")  { idx <- sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
-                if(famVec[a] %in% c("Tweedie","negbin"))  { idx <- sum(exp(p.1)); gPred=exp(p.1) }
-                
-                if(nBoot>10){
-                    Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
-                    brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
-                    if(!famVec[a] %in% c("Tweedie","negbin")){
-                        Xp.0=predict(m0,newdata=predD,type="lpmatrix");
-                        brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
-                        ilogit<-function(x) 1/(1+exp(-x));
-                        OS0 = matrix(0,nrow(predD),nBoot);
-                        terms.0=terms(m0)
-                        if(!is.null(m0$offset)){
-                            off.num.0 <- attr(terms.0, "offset")
-                            
-                            for (i in off.num.0) OS0 <- OS0 + eval(attr(terms.0, 
+                OS.pos = matrix(0,nrow(predD),nBoot);
+                terms.pos=terms(m.pos)
+                if(!is.null(m.pos$offset)){
+                    off.num.pos <- attr(terms.pos, "offset")
+                    
+                    for (i in off.num.pos) OS.pos <- OS.pos + eval(attr(terms.pos, 
                                                                         "variables")[[i + 1]], predD)
-                        }
-                        rep0=ilogit(Xp.0%*%t(brp.0)+OS0);
-                    }
-                    OS.pos = matrix(0,nrow(predD),nBoot);
-                    terms.pos=terms(m.pos)
-                    if(!is.null(m.pos$offset)){
-                        off.num.pos <- attr(terms.pos, "offset")
-                        
-                        for (i in off.num.pos) OS.pos <- OS.pos + eval(attr(terms.pos, 
-                                                                            "variables")[[i + 1]], predD)
-                    }
-                        
-                    
-                    if(famVec[a]=="LogNormal"){
-                        rep1=exp(Xp.1%*%t(brp.1)+sig2/2+OS.pos);
-                    } else {
-                        rep1=exp(Xp.1%*%t(brp.1)+OS.pos);
-                    } 
-
-                    if(!famVec[a] %in% c("Tweedie","negbin")){
-                        idxSamp = colSums(rep0*rep1);
-                    } else {
-                        idxSamp = colSums(rep1);
-                    }
-                    
-                    return(list(res=idx,upres=quantile(idxSamp,0.975),lores=quantile(idxSamp,0.025),gp2=gPred))
                 }
+                
+                
+                if(famVec[a]=="LogNormal"){
+                    rep1=exp(Xp.1%*%t(brp.1)+sig2/2+OS.pos);
+                } else {
+                    rep1=exp(Xp.1%*%t(brp.1)+OS.pos);
+                } 
+
+                if(!famVec[a] %in% c("Tweedie","negbin")){
+                    idxSamp = colSums(rep0*rep1);
+                } else {
+                    idxSamp = colSums(rep1);
+                }
+                
+                return(list(res=idx,upres=quantile(idxSamp,0.975),lores=quantile(idxSamp,0.025),gp2=gPred))
+            }
         } ## rof years
         yres = parallel::mclapply(levels(ddd$Year),do.one.y,mc.cores=mc.cores)
         for(y in levels(ddd$Year)) {
@@ -442,21 +442,22 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
             gp2[[y]] = yres[[ii]]$gp2            
         }
         list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=tail(gp2,1),gp2=gp2);
-        }## end do.one
-        noAges=length(ages);
-        rr=lapply(1:noAges,do.one.a);
-        logl=0;
-        for(a in 1:noAges){
-            resMat[,a]=rr[[a]]$res;
-            loMat[,a]=rr[[a]]$lo;
-            upMat[,a]=rr[[a]]$up;
-            gPreds[[a]]=rr[[a]]$gp;
-            gPreds2[[a]]=rr[[a]]$gp2
-        }
-        rownames(resMat)<-yearRange
-        colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2);
-        class(out) <- "surveyIdx"
-        out
+    }## end do.one
+    noAges=length(ages);
+    rr=lapply(1:noAges,do.one.a);
+    logl=0;
+    for(a in 1:noAges){
+        resMat[,a]=rr[[a]]$res;
+        loMat[,a]=rr[[a]]$lo;
+        upMat[,a]=rr[[a]]$up;
+        gPreds[[a]]=rr[[a]]$gp;
+        gPreds2[[a]]=rr[[a]]$gp2
     }
+    rownames(resMat)<-yearRange
+    colnames(resMat)<-ages
+    out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,
+                family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ);
+    class(out) <- "surveyIdx"
+    out
+}
 
