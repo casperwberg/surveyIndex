@@ -4,7 +4,7 @@
 \alias{retro.surveyIdx}
 \title{Make retrospective analysis for a "surveyIdx" model.}
 \usage{
-retro.surveyIdx(model, d, grid, npeels = 5)
+retro.surveyIdx(model, d, grid, predD = NULL, npeels = 5, ...)
 }
 \arguments{
 \item{model}{object of class "surveyIdx" as created by "getSurveyIdx"}
@@ -14,6 +14,8 @@ retro.surveyIdx(model, d, grid, npeels = 5)
 \item{grid}{surveyIndexGrid object (see getGrid) defining the grid.}
 
 \item{npeels}{number of years to successively peel of the data set}
+
+\item{...}{Optional extra arguments to "gam"}
 }
 \value{
 SIlist (list of surveyIndex objects)

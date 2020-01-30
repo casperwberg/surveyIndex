@@ -4,7 +4,7 @@
 \alias{leaveout.surveyIdx}
 \title{Make leave-one-out analysis}
 \usage{
-leaveout.surveyIdx(model, d, grid, fac)
+leaveout.surveyIdx(model, d, grid, predD = NULL, fac, ...)
 }
 \arguments{
 \item{model}{object of class "surveyIdx" as created by "getSurveyIdx"}
@@ -14,6 +14,8 @@ leaveout.surveyIdx(model, d, grid, fac)
 \item{grid}{surveyIndexGrid object (see getGrid) defining the grid.}
 
 \item{fac}{a factor in d to leave out one at a time, e.g. d$Survey}
+
+\item{...}{Optional extra arguments to "gam"}
 }
 \value{
 SIlist (list of surveyIndex objects)

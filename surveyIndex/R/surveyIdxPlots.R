@@ -27,8 +27,9 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
 {
     if (!plotByAge & !is.null(par)) 
         par(par)
+    mainwasnull <- is.null(main)
     for (a in cols) {
-        if(is.null(main)) main <- paste("Age group", colnames(dat$Nage)[a])
+        if(mainwasnull) main <- paste("Age group", colnames(dat$Nage)[a])
         if (plotByAge & !is.null(par)) 
             par(par)
         if (any(select == "index")) {

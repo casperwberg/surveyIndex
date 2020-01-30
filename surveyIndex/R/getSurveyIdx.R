@@ -456,7 +456,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
     rownames(resMat)<-yearRange
     colnames(resMat)<-ages
     out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,
-                family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ);
+                family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=model$knotsP, knotsZ=model$knotsZ);
     class(out) <- "surveyIdx"
     out
 }
