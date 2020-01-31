@@ -8,7 +8,7 @@
 ##' @return SIlist (list of surveyIndex objects)
 ##' @param ... Optional extra arguments to "gam"
 ##' @export
-retro.surveyIdx<-function(model, d, grid,predD=NULL,npeels=5,...){
+retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,...){
     if(is.null(predD)){
         predD = subset(d, haul.id %in% grid[[3]])
         predD = predD[[2]]
@@ -64,7 +64,7 @@ retro.surveyIdx<-function(model, d, grid,predD=NULL,npeels=5,...){
 ##' @param ... Optional extra arguments to "gam"
 ##' @return SIlist (list of surveyIndex objects)
 ##' @export
-leaveout.surveyIdx<-function(model,d,grid,predD=NULL,fac,...){
+leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
     stopifnot(is.factor(fac))
     
     if(is.null(predD)){
@@ -118,8 +118,6 @@ plot.SIlist<-function(x, base=x[[1]], rescale=FALSE,lwd=1.5,main=NULL, basename 
     on.exit(par(op))
     nx = length(x)
     cols = rainbow(nx)
-    y = as.numeric(rownames(base$idx))
-    yl = range( c(base$lo[,1],base$up[,1],base$idx[,1]) )
     allyears = lapply(x, function(x) rownames(x$idx))
     rsidx = 1:nrow(x[[nx]]$idx)
     if(rescale && nx>1){
@@ -133,12 +131,14 @@ plot.SIlist<-function(x, base=x[[1]], rescale=FALSE,lwd=1.5,main=NULL, basename 
     ss = 1
         
     for(aa in 1:n){
+        yl = range( c(base$lo[,aa],base$up[,aa],base$idx[,aa]) )
         if(rescale){
             rsidx = which(rownames(base$idx) %in% commonyears )
             ss =  mean( base$idx[rsidx,aa], na.rm=TRUE)
             yl = yl/ss
         }
         if(mainwasnull) main <- paste("age group", colnames(base)[aa])
+        y = as.numeric(rownames(base$idx))
         plot(y,base$idx[,aa]/ss,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
     
         polygon(c(y, rev(y)), c(base$lo[,aa], rev(base$up[,aa]))/ss, col = "lightgrey", border = NA)
