@@ -4,7 +4,7 @@
 \alias{retro.surveyIdx}
 \title{Make retrospective analysis for a "surveyIdx" model.}
 \usage{
-retro.surveyIdx(model, d, grid, predD = NULL, npeels = 5, ...)
+retro.surveyIdx(model, d, grid, npeels = 5, predD = NULL, ...)
 }
 \arguments{
 \item{model}{object of class "surveyIdx" as created by "getSurveyIdx"}

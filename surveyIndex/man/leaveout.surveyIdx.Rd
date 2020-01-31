@@ -4,7 +4,7 @@
 \alias{leaveout.surveyIdx}
 \title{Make leave-one-out analysis}
 \usage{
-leaveout.surveyIdx(model, d, grid, predD = NULL, fac, ...)
+leaveout.surveyIdx(model, d, grid, fac, predD = NULL, ...)
 }
 \arguments{
 \item{model}{object of class "surveyIdx" as created by "getSurveyIdx"}

@@ -4,14 +4,15 @@
 \alias{plot.SIlist}
 \title{Plot survey index list (e.g. retrospective analysis)}
 \usage{
-\method{plot}{SIlist}(x, base = x[[1]], rescale = FALSE, lwd = 1.5)
+\method{plot}{SIlist}(x, base = x[[1]], rescale = FALSE, lwd = 1.5,
+  main = NULL, basename = "base")
 }
 \arguments{
 \item{x}{object of class "SIlist" as created by e.g. "retro.surveyIdx" or "leaveout.surveyIdx"}
 
 \item{base}{object of class "surveyIdx" (base model)}
 
-\item{rescale}{Should indices be rescaled to have mean 1 (over period in last element of x)? Default: FALSE}
+\item{rescale}{Should indices be rescaled to have mean 1 (over the set of intersecting years)? Default: FALSE}
 
 \item{lwd}{line width argument to plot}
 }
