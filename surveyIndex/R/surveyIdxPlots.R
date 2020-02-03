@@ -35,10 +35,10 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
         if (any(select == "index")) {
             ys = range(as.numeric(levels(dat$Year)))
             ys = ys[1]:ys[2]
-            yl = range(c(x$idx[, a]/mean(x$idx[, a], 0))) * 1.1
+            yl = range(c(x$idx[, a]/mean(x$idx[, a]),0)) * 1.1
             if (!is.null(alt.idx) && a <= ncol(alt.idx)) {
                 yl = range(c(alt.idx[, a]/mean(alt.idx[, a]), 
-                  x$idx[, a]/mean(x$idx[, a], 0))) * 1.1
+                  yl)) * 1.1
                 plot(ys, alt.idx[, a]/mean(alt.idx[, a], na.rm = TRUE), 
                   ylim = yl, col = 2, ylab = "Index", xlab = "Year", 
                   main = main)
