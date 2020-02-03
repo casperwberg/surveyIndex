@@ -110,7 +110,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             }
         }
         if (any(select == "absolutemap")) {
-            if(is.null(year) || length(year)<=1) stop("argument 'year' must be vector of length>1 for type 'absolutemap'")
+            if(is.null(year) || length(year)<1) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
             xlims = range(dat$lon, na.rm = TRUE)
             ylims = range(dat$lat, na.rm = TRUE)
             if (is.null(predD)) {
