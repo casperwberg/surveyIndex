@@ -120,11 +120,11 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 tmp = predD
             }
             ## collect all years as data.frame
-            ally = data.frame(val=x$gPreds2[[1]][[1]],year=as.character(levels(dat$Year)[1]))
+            ally = data.frame(val=x$gPreds2[[a]][[1]],year=as.character(levels(dat$Year)[1]))
             cc=0
             for(y in levels(dat$Year)){
                 cc=cc+1
-                ally = rbind(ally, data.frame(val=x$gPreds2[[1]][[cc]],
+                ally = rbind(ally, data.frame(val=x$gPreds2[[a]][[cc]],
                                               year=as.character(levels(dat$Year)[cc])))
             }
             ally$conc = surveyIndex:::concTransform(log(ally$val))
