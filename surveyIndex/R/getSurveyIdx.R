@@ -48,7 +48,8 @@
 ##' ## Convert to numbers-at-age
 ##' ###############################
 ##' d.ysplit <- split(d, d$Year)
-##' ALK<-mclapply(d.ysplit,fitALK,minAge=min(ages),maxAge=max(ages),autoChooseK=TRUE,useBIC=TRUE,varCof=FALSE,maxK=50,mc.cores=mc.cores)
+##' ALK<-mclapply(d.ysplit,fitALK,minAge=min(ages),maxAge=max(ages),autoChooseK=TRUE,useBIC=TRUE,
+##'                varCof=FALSE,maxK=50,mc.cores=mc.cores)
 ##' Nage<-mclapply(ALK,predict,mc.cores=mc.cores)
 ##' for(i in 1:length(ALK)) d.ysplit[[i]]$Nage=Nage[[i]];
 ##' dd <- do.call("c",d.ysplit)
@@ -64,21 +65,25 @@
 ##' mP <- rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Depth,bs='ts',k=6)+offset(log(HaulDur))",length(ages)  );
 ##' mZ <- rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Depth,bs='ts',k=6)+offset(log(HaulDur))",length(ages)  );
 ##' 
-##' SIQ1 <- getSurveyIdx(dd,ages=ages,myids=grid[[3]],cutOff=0.1,kvecP=kvP,kvecZ=kvZ,modelZ=mZ,modelP=mP,mc.cores=mc.cores) ## if errors are encountered, debug with mc.cores=1 
+##' SIQ1 <- getSurveyIdx(dd,ages=ages,myids=grid[[3]],cutOff=0.1,kvecP=kvP,kvecZ=kvZ,
+##'          modelZ=mZ,modelP=mP,mc.cores=mc.cores) ## if errors are encountered, debug with mc.cores=1 
 ##' 
 ##' strat.mean<-getSurveyIdxStratMean(dd,ages)
 ##' 
 ##' ## plot indices, distribution map, and estimated depth effects
-##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=strat.mean,grid[[3]],par=list(mfrow=c(3,3)),legend=FALSE,select="index",plotByAge=FALSE)
+##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=strat.mean,grid[[3]],par=list(mfrow=c(3,3)),legend=FALSE,
+##'                select="index",plotByAge=FALSE)
 ##' 
-##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),legend=FALSE,colors=rev(heat.colors(8)),select="map",plotByAge=FALSE)
+##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),legend=FALSE,
+##'                 colors=rev(heat.colors(8)),select="map",plotByAge=FALSE)
 ##' 
-##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),legend=FALSE,select="2",plotByAge=FALSE)
-##' 
+##' surveyIdxPlots(SIQ1,dd,cols=ages,alt.idx=NULL,grid[[3]],par=list(mfrow=c(3,3)),
+##'                 legend=FALSE,select="2",plotByAge=FALSE)
 ##' 
 ##' ## Calculate internal concistency and export to file
 ##' internalCons(SIQ1$idx)
-##' exportSI(SIQ1$idx,ages=ages,years=levels(dd$Year),toy=mean(dd$timeOfYear),file="out.dat",nam="Survey index demo example")
+##' exportSI(SIQ1$idx,ages=ages,years=levels(dd$Year),toy=mean(dd$timeOfYear),file="out.dat",
+##'          nam="Survey index demo example")
 ##' }
 ##' @importFrom MASS mvrnorm
 ##' @export
