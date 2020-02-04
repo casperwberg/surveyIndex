@@ -9,7 +9,7 @@ residuals.surveyIdx <- function(x,a=1){
     if (pmatch("Tweedie", x$pModels[[a]]$family$family, 
                nomatch = -1) == 1) {
         resi = qres.tweedie(x$pModels[[a]])
-    } else if(pmatch("LogNormal", x$pModels[[a]]$family$family, 
+    } else if(pmatch("gaussian", x$pModels[[a]]$family$family, 
                nomatch = -1) == 1 ){## Delta-Lognormal
         y = x$zModels[[a]]$y
         p0 = predict(x$zModels[[a]],type="response")

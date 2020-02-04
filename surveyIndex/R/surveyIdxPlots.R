@@ -26,17 +26,21 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
     legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",...) 
 {
-    if (!plotByAge & !is.null(par)) 
-        par(par)
+    if (!plotByAge & !is.null(par)){ 
+        op<-par(par)
+        on.exit(par(op))
+    }
     mainwasnull <- is.null(main)
     for (a in cols) {
         if(mainwasnull) main <- paste("Age group", colnames(dat$Nage)[a])
-        if (plotByAge & !is.null(par)) 
-            par(par)
+        if (plotByAge & !is.null(par)){ 
+            op<-par(par)
+            on.exit(par(op))
+        }
         if (any(select == "index")) {
             ys = range(as.numeric(levels(dat$Year)))
             ys = ys[1]:ys[2]
-            yl = range(c(x$idx[, a]/mean(x$idx[, a]),0)) * 1.1
+            yl = range(c(x$idx[, a],0,x$lo,x$up)/mean(x$idx[, a]),na.rm=TRUE) 
             if (!is.null(alt.idx) && a <= ncol(alt.idx)) {
                 yl = range(c(alt.idx[, a]/mean(alt.idx[, a]), 
                   yl)) * 1.1
@@ -60,7 +64,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 lty = 2)
             lines(ys, up[, a]/mean(idx[, a], na.rm = TRUE), lwd = 2, 
                 lty = 2)
-            if (legend) 
+            if (legend && !is.null(alt.idx)) 
                 legend(legend.pos, pch = c(1, NA), lty = c(NA, 
                   1), col = c(2, 1), legend = c("alt.idx", "GAM"))
         }
@@ -184,8 +188,8 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
         }
         if (any(select == "spatialResiduals")) {
             scale <- 3
-            if (is.null(year)) 
-                stop("a year must be supplied")
+            if (is.null(year) || length(year)>1) 
+                stop("a single year must be supplied")
             sel <- which(dat[[2]]$Year == as.character(year))
             plot(dat$lon, dat$lat, type = "n", 
                 xlab = "Longitude", ylab = "Latitude", main = main,...)
