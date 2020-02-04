@@ -16,6 +16,7 @@
 ##' @param year numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' year must be a vector. 
 ##' @param main optional main title (overrides default title)
 ##' @param legend.signif Number of significant digits in map legends
+##' @param legend.pos Position of legend (e.g. "bottomleft") see ?legend
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -23,7 +24,7 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",...) 
 {
     if (!plotByAge & !is.null(par)) 
         par(par)
@@ -60,7 +61,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             lines(ys, up[, a]/mean(idx[, a], na.rm = TRUE), lwd = 2, 
                 lty = 2)
             if (legend) 
-                legend("topright", pch = c(1, NA), lty = c(NA, 
+                legend(legend.pos, pch = c(1, NA), lty = c(NA, 
                   1), col = c(2, 1), legend = c("alt.idx", "GAM"))
         }
         if (any(select == "map")) {
@@ -106,11 +107,12 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 ml = signif(mincuts[,2]/mm,legend.signif)
                 ml[1] = 0
                 leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
-                legend("topright", legend = leg, pch = 16, col = colors, bg = "white")
+                legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
             }
         }
         if (any(select == "absolutemap")) {
             if(is.null(year) || length(year)<1) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
+            if( !all(year %in% levels(dat$Year)) ) stop("invalid years selected")
             xlims = range(dat$lon, na.rm = TRUE)
             ylims = range(dat$lat, na.rm = TRUE)
             if (is.null(predD)) {
@@ -143,7 +145,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                     ml = signif(mincuts[,2]/mm,legend.signif)
                     ml[1] = 0
                     leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
-                    legend("topright", legend = leg, pch = 16, col = colors, bg = "white")
+                    legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
                 }
             }
         }
@@ -166,7 +168,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             resi <- residuals(x,a)
         }
         if (any(select == "residuals")) {
-            hist(resi, nclass = 30, main = main, xlab = "Residuals")
+            hist(resi, nclass = 30, main = main, xlab = "Residuals",...)
         }
         if (any(select == "fitVsRes")) {
             plot(fitted(x$pModels[[a]]), residuals(x$pModels[[a]]), xlab = "Fitted", 
