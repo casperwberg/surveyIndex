@@ -9,7 +9,8 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
   "fitVsRes"), par = list(mfrow = c(3, 3)),
   colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE,
   legend = TRUE, predD = NULL, year = NULL, main = NULL,
-  legend.signif = 3, legend.pos = "topright", ...)
+  legend.signif = 3, legend.pos = "topright", restoreOldPar = FALSE,
+  ...)
 }
 \arguments{
 \item{x}{Survey index as produced by getSurveyIndex()}
@@ -43,6 +44,8 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
 \item{legend.signif}{Number of significant digits in map legends}
 
 \item{legend.pos}{Position of legend (e.g. "bottomleft") see ?legend}
+
+\item{restoreOldPar}{restore old par() on exit? Default=FALSE}
 
 \item{...}{Additional parameters for plot()}
 }
