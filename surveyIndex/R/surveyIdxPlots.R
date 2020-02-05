@@ -17,6 +17,7 @@
 ##' @param main optional main title (overrides default title)
 ##' @param legend.signif Number of significant digits in map legends
 ##' @param legend.pos Position of legend (e.g. "bottomleft") see ?legend
+##' @param restoreOldPar restore old par() on exit? Default=FALSE
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -24,18 +25,18 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,...) 
 {
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)
-        on.exit(par(op))
+        if(restoreOldPar) on.exit(par(op))
     }
     mainwasnull <- is.null(main)
     for (a in cols) {
         if(mainwasnull) main <- paste("Age group", colnames(dat$Nage)[a])
         if (plotByAge & !is.null(par)){ 
             op<-par(par)
-            on.exit(par(op))
+            if(restoreOldPar) on.exit(par(op))
         }
         if (any(select == "index")) {
             ys = range(as.numeric(levels(dat$Year)))

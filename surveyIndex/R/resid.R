@@ -11,25 +11,32 @@ residuals.surveyIdx <- function(x,a=1){
         resi = qres.tweedie(x$pModels[[a]])
     } else if(pmatch("gaussian", x$pModels[[a]]$family$family, 
                nomatch = -1) == 1 ){## Delta-Lognormal
-        y = x$zModels[[a]]$y
-        p0 = predict(x$zModels[[a]],type="response")
-        vari = x$family$variance
+        y = x$allobs[[a]]
+        logy = y
+        psel = y>x$cutOff 
+        logy[psel] = log( y[psel] )
         
-        cdfpos = pnorm( q=y,mean=predict(x$pModels[[a]],type="link"), sd=sqrt(vari))
+        p0 = predict(x$zModels[[a]],type="response") ## P( obs > cutOff ) 
+        vari = x$pModels[[a]]$sig2
+        cdfpos = rep(0,length(y))
+        cdfpos[psel] = pnorm( q=logy[psel],mean=predict(x$pModels[[a]],type="link"), sd=sqrt(vari))
         u = (1-p0) + cdfpos*p0
-        u[ y == 0 ] = runif(sum(y == 0), min = 0, max = u[y == 0])
+        u[ !psel ] = runif(sum(!psel), min = 0, max = u[!psel])
         resi = qnorm(u)
             
     } else if(pmatch("Gamma", x$pModels[[a]]$family$family, 
                      nomatch = -1) == 1 ){
         requireNamespace("MASS")
-        y = x$zModels[[a]]$y
+        y = x$allobs[[a]]
+        psel = y>x$cutOff 
+                
         p0 = predict(x$zModels[[a]],type="response")
         means = predict(x$pModels[[a]],type="response")
         shape = MASS::gamma.shape(x$pModels[[a]])$alpha
-        cdfpos = pgamma( q=y,shape=shape,rate=shape/means) 
+        cdfpos = rep(0,length(y))
+        cdfpos[psel] = pgamma( q=y[psel],shape=shape,rate=shape/means) 
         u = (1-p0) + cdfpos*p0
-        u[ y == 0 ] = runif(sum(y == 0), min = 0, max = u[y == 0])
+        u[ !psel ] = runif(sum(!psel), min = 0, max = u[!psel])
         resi = qnorm(u)
         
     } else if(pmatch("Negative Binomial", x$pModels[[a]]$family$family, 

@@ -9,7 +9,7 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
   "fitVsRes"), par = list(mfrow = c(3, 3)),
   colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE,
   legend = TRUE, predD = NULL, year = NULL, main = NULL,
-  legend.signif = 3, ...)
+  legend.signif = 3, legend.pos = "topright", ...)
 }
 \arguments{
 \item{x}{Survey index as produced by getSurveyIndex()}
@@ -41,6 +41,8 @@ surveyIdxPlots(x, dat, alt.idx = NULL, myids,
 \item{main}{optional main title (overrides default title)}
 
 \item{legend.signif}{Number of significant digits in map legends}
+
+\item{legend.pos}{Position of legend (e.g. "bottomleft") see ?legend}
 
 \item{...}{Additional parameters for plot()}
 }

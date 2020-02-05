@@ -88,7 +88,7 @@
 ##' @importFrom MASS mvrnorm
 ##' @export
 getSurveyIdx <-
-    function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=2,method="ML",predD=NULL,
+    function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=1,method="ML",predD=NULL,
              modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL, ...
              ){
         
@@ -112,7 +112,7 @@ getSurveyIdx <-
         zModels=list()
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
-        pData=list()
+        allobs=list() ## response vector (zeroes and positive)
         
         yearNum=as.numeric(as.character(x$Year));
         yearRange=min(yearNum):max(yearNum);
@@ -306,14 +306,14 @@ getSurveyIdx <-
             upMat[,a]=rr[[a]]$up;
             gPreds[[a]]=rr[[a]]$gp;
             logl=logl+rr[[a]]$ll
-            pData[[a]] = rr[[a]]$pd
             gPreds2[[a]]=rr[[a]]$gp2
+            allobs[[a]]=x[[2]]$Nage[,a]
         }
         getEdf<-function(m) sum(m$edf)
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
         rownames(resMat)<-yearRange
         colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,pData=pData,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ);
+        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs);
         class(out) <- "surveyIdx"
         out
     }
