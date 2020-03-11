@@ -137,13 +137,13 @@ plot.SIlist<-function(x, base=x[[1]], rescale=FALSE,lwd=1.5,main=NULL, basename 
             ss =  mean( base$idx[rsidx,aa], na.rm=TRUE)
             yl = yl/ss
         }
-        if(mainwasnull) main <- paste("age group", colnames(base)[aa])
+        if(mainwasnull) main <- paste("Age group", colnames(base$idx)[aa])
         y = as.numeric(rownames(base$idx))
         plot(y,base$idx[,aa]/ss,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
     
         polygon(c(y, rev(y)), c(base$lo[,aa], rev(base$up[,aa]))/ss, col = "lightgrey", border = NA)
         lines(y,base$idx[,aa]/ss,type="b",lwd=lwd)
-
+        
         for(i in 1:length(x)){
             y = as.numeric(rownames(x[[i]]$idx))
             if(rescale){
