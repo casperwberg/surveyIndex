@@ -114,7 +114,15 @@ getSurveyIdx <-
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
         allobs=list() ## response vector (zeroes and positive)
-        
+        resid=list() ## residuals
+
+        if (exists(".Random.seed")) {
+            oldseed <- get(".Random.seed", .GlobalEnv)
+            oldRNGkind <- RNGkind()
+            on.exit( { do.call("RNGkind", as.list(oldRNGkind)); assign(".Random.seed", oldseed, .GlobalEnv) }  )
+        }
+        set.seed(314159265)
+            
         yearNum=as.numeric(as.character(x$Year));
         yearRange=min(yearNum):max(yearNum);
 
@@ -315,6 +323,8 @@ getSurveyIdx <-
         colnames(resMat)<-ages
         out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs);
         class(out) <- "surveyIdx"
+        for(a in 1:noAges) resid[[a]] = residuals(out,a)
+        out$residuals = resid
         out
     }
 

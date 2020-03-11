@@ -163,14 +163,8 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
         if (any(select == "residuals") || any(select == "fitVsRes") || 
             any(select == "resVsYear") || any(select == "resVsShip") || 
             any(select == "spatialResiduals")) {
-            ## if (pmatch("Tweedie", x$pModels[[a]]$family$family, 
-            ##     nomatch = -1) == 1) {
-            ##     resi <- qres.tweedie(x$pModels[[a]])
-            ## }
-            ## else {
-            ##     resi <- residuals(x$pModels[[a]])
-            ## }
-            resi <- residuals(x,a)
+            
+            resi <- x$residuals[[a]] ##residuals(x,a)
         }
         if (any(select == "residuals")) {
             hist(resi, nclass = 30, main = main, xlab = "Residuals",...)
