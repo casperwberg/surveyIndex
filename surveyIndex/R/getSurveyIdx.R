@@ -323,6 +323,7 @@ getSurveyIdx <-
         colnames(resMat)<-ages
         out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs);
         class(out) <- "surveyIdx"
+        set.seed(314159265) ## reset seed here (in case multicore option is used)
         for(a in 1:noAges) resid[[a]] = residuals(out,a)
         out$residuals = resid
         out
