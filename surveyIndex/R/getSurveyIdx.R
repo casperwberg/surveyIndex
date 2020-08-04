@@ -16,7 +16,7 @@
 ##' @param nBoot number of bootstrap samples used for calculating index confidence intervals
 ##' @param mc.cores number of cores for parallel processing
 ##' @param method smoothness selection method used by 'gam'
-##' @param predD optional DATRASraw object, defaults to NULL. If not null this is used as grid.
+##' @param predD optional DATRASraw object or data.frame (or named list with such objects, one for each year with names(predD) being the years) , defaults to NULL. If not null this is used as grid.
 ##' @param modelZ vector of model formulae for presence/absence part, one pr. age group (ignored for Tweedie models)
 ##' @param modelP vector of model formulae for strictly positive repsonses, one pr. age group
 ##' @param knotsP optional list of knots to gam, strictly positive repsonses
@@ -115,7 +115,8 @@ getSurveyIdx <-
         gPreds2=list() ## all years predictions
         allobs=list() ## response vector (zeroes and positive)
         resid=list() ## residuals
-
+        predDc = predD ##copy of predD
+        
         if (exists(".Random.seed")) {
             oldseed <- get(".Random.seed", .GlobalEnv)
             oldRNGkind <- RNGkind()
@@ -139,6 +140,7 @@ getSurveyIdx <-
             ddd$A1=ddd$Nage[,age]
             gammaPos=gamma;
             gammaZ=gamma;
+            
             if(useBIC){
                 nZ=nrow(ddd);
                 nPos=nrow(subset(ddd,A1>cutOff));
@@ -229,7 +231,8 @@ getSurveyIdx <-
                     lores[which(as.character(yearRange)==y)] = 0;
                     next;
                 }
-
+                if(is.list(predDc) && !class(predDc)%in%c("data.frame","DATRASraw")) predD = predDc[[as.character(y)]]
+                if(is.null(predD)) stop(paste("Year",y," not found in predD"))
                 ## OBS: effects that should be removed should be included here
                 predD$Year=y; predD$dum=0;
                 predD$ctime=as.numeric(as.character(y));
@@ -354,6 +357,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
 
     gPreds=list() ##last data year's predictions
     gPreds2=list() ## all years predictions
+    predDc = predD
     
     myGear=model$refGear 
     
@@ -375,6 +379,10 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
         do.one.y<-function(y){
             
             cat("Doing year ",y,"\n")
+            
+            if(is.list(predDc) && !class(predDc)%in%c("data.frame","DATRASraw")) predD = predDc[[as.character(y)]]
+            if(is.null(predD)) stop(paste("Year",y," not found in predD"))
+
             ## take care of years with all zeroes
             if(!any(ddd$A1[ddd$Year==y]>cutOff)){
                 return(list(res=0,upres=0,lores=0,gp2=NULL))
