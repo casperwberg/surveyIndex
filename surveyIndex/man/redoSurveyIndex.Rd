@@ -4,8 +4,15 @@
 \alias{redoSurveyIndex}
 \title{Re-compute standardized survey indices for an alternative grid from a previous fitted "surveyIdx" model.}
 \usage{
-redoSurveyIndex(x, model, predD = NULL, myids, nBoot = 1000, predfix,
-  mc.cores = 1)
+redoSurveyIndex(
+  x,
+  model,
+  predD = NULL,
+  myids,
+  nBoot = 1000,
+  predfix,
+  mc.cores = 1
+)
 }
 \arguments{
 \item{x}{DATRASraw dataset}

@@ -4,17 +4,20 @@
 \alias{plot.SIlist}
 \title{Plot survey index list (e.g. retrospective analysis)}
 \usage{
-\method{plot}{SIlist}(x, base = x[[1]], rescale = FALSE, lwd = 1.5,
-  main = NULL, basename = "base")
+\method{plot}{SIlist}(x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL, allCI = FALSE)
 }
 \arguments{
-\item{x}{object of class "SIlist" as created by e.g. "retro.surveyIdx" or "leaveout.surveyIdx"}
+\item{x}{(named) list of "surveyIdx" objects for example from "retro.surveyIdx" or "leaveout.surveyIdx"}
 
-\item{base}{object of class "surveyIdx" (base model)}
+\item{base}{index of x that should considered the "base run". Confidence bounds will be shown for this model only.}
 
 \item{rescale}{Should indices be rescaled to have mean 1 (over the set of intersecting years)? Default: FALSE}
 
 \item{lwd}{line width argument to plot}
+
+\item{main}{if not NULL override main plotting default title of "Age group a"}
+
+\item{allCI}{show 95\% confidence lines for all indices? Default FALSE.}
 }
 \value{
 nothing

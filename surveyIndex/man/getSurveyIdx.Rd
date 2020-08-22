@@ -4,15 +4,32 @@
 \alias{getSurveyIdx}
 \title{Calculate survey indices by age.}
 \usage{
-getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
-  kvecZ = rep(8 * 8, length(ages)), gamma = 1.4, cutOff = 1,
-  fam = "Gamma", useBIC = FALSE, nBoot = 1000, mc.cores = 1,
-  method = "ML", predD = NULL,
-  modelZ = rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
-  length(ages)),
-  modelP = rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
-  length(ages)), knotsP = NULL, knotsZ = NULL, predfix = NULL,
-  linkZ = "logit", ...)
+getSurveyIdx(
+  x,
+  ages,
+  myids,
+  kvecP = rep(12 * 12, length(ages)),
+  kvecZ = rep(8 * 8, length(ages)),
+  gamma = 1.4,
+  cutOff = 1,
+  fam = "Gamma",
+  useBIC = FALSE,
+  nBoot = 1000,
+  mc.cores = 1,
+  method = "ML",
+  predD = NULL,
+ 
+    modelZ = rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
+    length(ages)),
+ 
+    modelP = rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",
+    length(ages)),
+  knotsP = NULL,
+  knotsZ = NULL,
+  predfix = NULL,
+  linkZ = "logit",
+  ...
+)
 }
 \arguments{
 \item{x}{DATRASraw object}
@@ -39,7 +56,7 @@ getSurveyIdx(x, ages, myids, kvecP = rep(12 * 12, length(ages)),
 
 \item{method}{smoothness selection method used by 'gam'}
 
-\item{predD}{optional DATRASraw object, defaults to NULL. If not null this is used as grid.}
+\item{predD}{optional DATRASraw object or data.frame (or named list with such objects, one for each year with names(predD) being the years) , defaults to NULL. If not null this is used as grid.}
 
 \item{modelZ}{vector of model formulae for presence/absence part, one pr. age group (ignored for Tweedie models)}
 

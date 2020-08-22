@@ -53,7 +53,6 @@ retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,...){
     res
     
 }
-
 ##' Make leave-one-out analysis
 ##'
 ##' @title Make leave-one-out analysis
@@ -101,48 +100,56 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
     class(res)<-"SIlist"
     res
 }
-
 ##' Plot survey index list (e.g. retrospective analysis)
 ##'
 ##' @title Plot survey index list (e.g. retrospective analysis)
-##' @param x object of class "SIlist" as created by e.g. "retro.surveyIdx" or "leaveout.surveyIdx"
-##' @param base object of class "surveyIdx" (base model)
+##' @param x (named) list of "surveyIdx" objects for example from "retro.surveyIdx" or "leaveout.surveyIdx"
+##' @param base index of x that should considered the "base run". Confidence bounds will be shown for this model only.
 ##' @param rescale Should indices be rescaled to have mean 1 (over the set of intersecting years)? Default: FALSE
 ##' @param lwd line width argument to plot
+##' @param main if not NULL override main plotting default title of "Age group a"  
+##' @param allCI show 95\% confidence lines for all indices? Default FALSE.
 ##' @return nothing
 ##' @export
-plot.SIlist<-function(x, base=x[[1]], rescale=FALSE,lwd=1.5,main=NULL, basename = "base"){
-    mainwasnull = is.null(main)
-    n = ncol(base$idx)
-    op <- par(mfrow=n2mfrow(n))
-    on.exit(par(op))
+plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
+    stopifnot(is.integer(base))
     nx = length(x)
-    cols = rainbow(nx)
+    mainwasnull = is.null(main)
+    n = ncol(x[[base]]$idx)
+    if(nx>1){
+        op <- par(mfrow=n2mfrow(n))
+        on.exit(par(op))
+    }
+
+    cols = rainbow(nx) 
+    if(nx==2) cols = 2:3 
+    cols[base] = "black"
     allyears = lapply(x, function(x) rownames(x$idx))
     rsidx = 1:nrow(x[[nx]]$idx)
-    if(rescale && nx>1){
+    if(rescale){
         commonyears = allyears[[1]]
-        for(i in 2:nx){
-            commonyears = intersect(commonyears,allyears[[i]])
+        if(nx>1){
+            for(i in 2:nx){
+                commonyears = intersect(commonyears,allyears[[i]])
+            }
+            if(length(commonyears)==0) stop("rescaling not possible because the set of common years is empty")
         }
-        if(length(commonyears)==0) stop("rescaling not possible because the set of common years is empty")
     }
     
-    ss = 1
+    ss <- ssbase <- 1
         
     for(aa in 1:n){
-        yl = range( c(base$lo[,aa],base$up[,aa],base$idx[,aa]) )
+        yl = range( c(x[[base]]$lo[,aa],x[[base]]$up[,aa],x[[base]]$idx[,aa]) )
         if(rescale){
-            rsidx = which(rownames(base$idx) %in% commonyears )
-            ss =  mean( base$idx[rsidx,aa], na.rm=TRUE)
-            yl = yl/ss
+            rsidx = which(rownames(x[[base]]$idx) %in% commonyears )
+            ssbase =  mean( x[[base]]$idx[rsidx,aa], na.rm=TRUE)
+            yl = yl/ssbase
         }
-        if(mainwasnull) main <- paste("Age group", colnames(base$idx)[aa])
-        y = as.numeric(rownames(base$idx))
-        plot(y,base$idx[,aa]/ss,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
+        if(mainwasnull) main <- paste("Age group", colnames(x[[base]]$idx)[aa])
+        y = as.numeric(rownames(x[[base]]$idx))
+        plot(y,x[[base]]$idx[,aa]/ssbase,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
     
-        polygon(c(y, rev(y)), c(base$lo[,aa], rev(base$up[,aa]))/ss, col = "lightgrey", border = NA)
-        lines(y,base$idx[,aa]/ss,type="b",lwd=lwd)
+        polygon(c(y, rev(y)), c(x[[base]]$lo[,aa], rev(x[[base]]$up[,aa]))/ssbase, col = "lightgrey", border = NA)
         
         for(i in 1:length(x)){
             y = as.numeric(rownames(x[[i]]$idx))
@@ -151,10 +158,18 @@ plot.SIlist<-function(x, base=x[[1]], rescale=FALSE,lwd=1.5,main=NULL, basename 
                 ss = mean( x[[i]]$idx[rsidx,aa], na.rm=TRUE)
             }
             lines(y,x[[i]]$idx[,aa]/ss,col=cols[i],type="b", lwd=lwd)
+
+            if(allCI && i!=base){
+                lines(y,x[[i]]$lo[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
+                lines(y,x[[i]]$up[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
+            }   
+            
         }
+        y = as.numeric(rownames(x[[base]]$idx))
+        lines(y,x[[base]]$idx[,aa]/ssbase,type="b",lwd=lwd)
         
     }
     if(!is.null(names(x))){
-        legend("topleft",legend=c(basename,names(x)),col=c("black",cols),lty=1,lwd=lwd,pch=1)
+        legend("topleft",legend=names(x),col=cols,lty=1,lwd=lwd,pch=1)
     }
 }

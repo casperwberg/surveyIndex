@@ -4,8 +4,7 @@
 \alias{getEffect}
 \title{Calculate confidence intervals for a named parameter in a survey index model.}
 \usage{
-getEffect(x, dat, parName = "Gear", cutOff, nboot = 1000,
-  pOnly = FALSE)
+getEffect(x, dat, parName = "Gear", cutOff, nboot = 1000, pOnly = FALSE)
 }
 \arguments{
 \item{x}{survey index}
