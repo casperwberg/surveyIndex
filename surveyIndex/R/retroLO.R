@@ -116,7 +116,7 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
     nx = length(x)
     mainwasnull = is.null(main)
     n = ncol(x[[base]]$idx)
-    if(nx>1){
+    if(n>1){
         op <- par(mfrow=n2mfrow(n))
         on.exit(par(op))
     }
