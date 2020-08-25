@@ -112,7 +112,7 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @return nothing
 ##' @export
 plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
-    stopifnot(is.integer(base))
+    stopifnot(is.numeric(base))
     nx = length(x)
     mainwasnull = is.null(main)
     n = ncol(x[[base]]$idx)
