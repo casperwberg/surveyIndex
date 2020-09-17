@@ -417,9 +417,30 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
                     predD[,n] = predfix[[n]]
                 }
             }
-
-            p.1=try(predict(m.pos,newdata=predD,newdata.guaranteed=TRUE));
-            if(!famVec[a] %in% c("Tweedie","negbin")) p.0=try(predict(m0,newdata=predD,type="response",newdata.guaranteed=TRUE));
+            p.1 <- p.0 <- NULL
+            try({
+                Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
+                OS.pos = numeric(nrow(predD));
+                terms.pos=terms(m.pos)
+                if(!is.null(m.pos$offset)){
+                    off.num.pos <- attr(terms.pos, "offset")
+                    for (i in off.num.pos) OS.pos <- OS.pos + eval(attr(terms.pos, 
+                                                                            "variables")[[i + 1]], predD)
+                }
+                p.1 =Xp.1%*%coef(m.pos)+OS.pos;
+                if(!famVec[a] %in% c("Tweedie","negbin")){
+                    Xp.0=predict(m0,newdata=predD,type="lpmatrix");
+                    brp.0=coef(m0);
+                    OS0 = numeric(nrow(predD))
+                    terms.0=terms(m0)
+                    if(!is.null(m0$offset)){
+                        off.num.0 <- attr(terms.0, "offset")
+                        for (i in off.num.0) OS0 <- OS0 + eval(attr(terms.0, 
+                                                                    "variables")[[i + 1]], predD)
+                    }
+                    p.0 = m0$family$linkinv(Xp.0%*%brp.0+OS0);
+                }
+            });
             ## take care of failing predictions
             if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
                 return(list(res=0,upres=0,lores=0,gp2=NULL))
@@ -431,10 +452,8 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
             if(famVec[a] %in% c("Tweedie","negbin"))  { idx <- sum(exp(p.1)); gPred=exp(p.1) }
             
             if(nBoot>10){
-                Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
                 brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
                 if(!famVec[a] %in% c("Tweedie","negbin")){
-                    Xp.0=predict(m0,newdata=predD,type="lpmatrix");
                     brp.0=mvrnorm(n=nBoot,coef(m0),m0$Vp);
                     OS0 = matrix(0,nrow(predD),nBoot);
                     terms.0=terms(m0)
