@@ -104,7 +104,7 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##'
 ##' @title Plot survey index list (e.g. retrospective analysis)
 ##' @param x (named) list of "surveyIdx" objects for example from "retro.surveyIdx" or "leaveout.surveyIdx"
-##' @param base index of x that should considered the "base run". Confidence bounds will be shown for this model only.
+##' @param base Either index of x that should considered the "base run" (integer), OR object of class "surveyIdx". Confidence bounds will be shown for this model only.
 ##' @param rescale Should indices be rescaled to have mean 1 (over the set of intersecting years)? Default: FALSE
 ##' @param lwd line width argument to plot
 ##' @param main if not NULL override main plotting default title of "Age group a"  
@@ -112,6 +112,10 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @return nothing
 ##' @export
 plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
+    if(class(base)=="surveyIdx"){
+        x = c( list(base), x)
+        base = 1
+    }
     stopifnot(is.numeric(base))
     nx = length(x)
     mainwasnull = is.null(main)
