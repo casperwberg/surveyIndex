@@ -69,11 +69,14 @@ qres.tweedie<-function (gam.obj)
     df <- gam.obj$df.residual
     w <- gam.obj$prior.weights
     if (is.null(w)) 
-        w <- 1
+        w <- rep(1,length(y))
     p <- gam.obj$family$getTheta(TRUE)
     dispersion <- gam.obj$scale
-    u <- tweedie::ptweedie(q = y, power = p, mu = fitted(gam.obj), 
-        phi = dispersion/w)
+    u <- numeric(length(y))
+    fitt <- fitted(gam.obj)
+    for(i in 1:length(u)){
+        u[i] <- tweedie::ptweedie(q = y[i], power = p, mu = fitt[i],phi = dispersion/w[i])
+    }
     if (p > 1 && p < 2) 
         u[y == 0] <- runif(sum(y == 0), min = 0, max = u[y == 
             0])
