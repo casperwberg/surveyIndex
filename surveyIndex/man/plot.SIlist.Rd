@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{(named) list of "surveyIdx" objects for example from "retro.surveyIdx" or "leaveout.surveyIdx"}
 
-\item{base}{index of x that should considered the "base run". Confidence bounds will be shown for this model only.}
+\item{base}{Either index of x that should considered the "base run" (integer), OR object of class "surveyIdx". Confidence bounds will be shown for this model only.}
 
 \item{rescale}{Should indices be rescaled to have mean 1 (over the set of intersecting years)? Default: FALSE}
 
