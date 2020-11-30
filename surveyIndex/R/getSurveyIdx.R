@@ -18,11 +18,14 @@
 ##' @param method smoothness selection method used by 'gam'
 ##' @param predD optional DATRASraw object or data.frame (or named list with such objects, one for each year with names(predD) being the years) , defaults to NULL. If not null this is used as grid.
 ##' @param modelZ vector of model formulae for presence/absence part, one pr. age group (ignored for Tweedie models)
+##' @param length) 
 ##' @param modelP vector of model formulae for strictly positive repsonses, one pr. age group
+##' @param length) 
 ##' @param knotsP optional list of knots to gam, strictly positive repsonses
 ##' @param knotsZ optional list of knots to gam, presence/absence
 ##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
 ##' @param linkZ link function for the binomial part of the model, default: "logit" (not used for Tweedie models).
+##' @param CIlevel Confidence interval level, defaults to 0.95.
 ##' @param ... Optional extra arguments to "gam"
 ##' @return A survey index (list)
 ##' @examples
@@ -90,7 +93,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=1,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", ...
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", CIlevel=0.95,...
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
@@ -315,8 +318,9 @@ getSurveyIdx <-
                     } else {
                         idxSamp = colSums(rep1);
                     }
-                    upres[which(as.character(yearRange)==y)] = quantile(idxSamp,0.975);
-                    lores[which(as.character(yearRange)==y)] = quantile(idxSamp,0.025);
+                    halpha = (1-CIlevel)/2
+                    upres[which(as.character(yearRange)==y)] = quantile(idxSamp,1-halpha);
+                    lores[which(as.character(yearRange)==y)] = quantile(idxSamp,halpha);
                 }
             } ## rof years
             list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2);
@@ -339,7 +343,7 @@ getSurveyIdx <-
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
         rownames(resMat)<-yearRange
         colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs);
+        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
         class(out) <- "surveyIdx"
         set.seed(314159265) ## reset seed here (in case multicore option is used)
         for(a in 1:noAges) resid[[a]] = residuals(out,a)
@@ -486,8 +490,8 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
                 } else {
                     idxSamp = colSums(rep1);
                 }
-                
-                return(list(res=idx,upres=quantile(idxSamp,0.975),lores=quantile(idxSamp,0.025),gp2=gPred))
+                halpha = (1-model$CIlevel)/2
+                return(list(res=idx,upres=quantile(idxSamp,1-halpha),lores=quantile(idxSamp,halpha),gp2=gPred))
             }
         } ## rof years
         yres = parallel::mclapply(levels(ddd$Year),do.one.y,mc.cores=mc.cores)
