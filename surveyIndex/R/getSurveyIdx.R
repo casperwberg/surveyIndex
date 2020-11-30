@@ -156,14 +156,14 @@ getSurveyIdx <-
                 f.pos = as.formula( paste( "log(A1) ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
+                print(system.time(m.pos<-DATRAS:::tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
 
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, " in the positive part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 
-                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family=binomial(link=linkZ),method=method,knots=knotsZ,na.action=na.fail,...))$value));
+                print(system.time(m0<-DATRAS:::tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family=binomial(link=linkZ),method=method,knots=knotsZ,na.action=na.fail,...))$value));
 
                 if(class(m0)[2] == "error") {
                     print(m0)
@@ -174,14 +174,14 @@ getSurveyIdx <-
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
                 f.0 = as.formula( paste( "A1>",cutOff," ~",modelZ[a]));
                 
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),family=Gamma(link="log"),gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
+                print(system.time(m.pos<-DATRAS:::tryCatch.W.E(gam(f.pos,data=subset(ddd,A1>cutOff),family=Gamma(link="log"),gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
 
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, " in the positive part of the model\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
                 }
                 
-                print(system.time(m0<-tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family=binomial(link=linkZ),method=method,knots=knotsZ,na.action=na.fail,...))$value));
+                print(system.time(m0<-DATRAS:::tryCatch.W.E(gam(f.0,gamma=gammaZ,data=ddd,family=binomial(link=linkZ),method=method,knots=knotsZ,na.action=na.fail,...))$value));
 
                 if(class(m0)[2] == "error") {
                     print(m0)
@@ -191,7 +191,7 @@ getSurveyIdx <-
                 ddd$A1[ ddd$A1<cutOff ] = 0
                 pd = ddd
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
+                print(system.time(m.pos<-DATRAS:::tryCatch.W.E(gam(f.pos,data=ddd,family=tw,gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")
@@ -200,7 +200,7 @@ getSurveyIdx <-
             } else if(famVec[a]=="negbin"){
                 pd = ddd
                 f.pos = as.formula( paste( "A1 ~",modelP[a]));
-                print(system.time(m.pos<-tryCatch.W.E(gam(f.pos,data=ddd,family=nb,gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
+                print(system.time(m.pos<-DATRAS:::tryCatch.W.E(gam(f.pos,data=ddd,family=nb,gamma=gammaPos,method=method,knots=knotsP,na.action=na.fail,...))$value));
                 if(class(m.pos)[2] == "error") {
                     print(m.pos)
                     stop("Error occured for age ", a, ".\n", "Try reducing the number of age groups or decrease the basis dimension of the smooths, k\n")

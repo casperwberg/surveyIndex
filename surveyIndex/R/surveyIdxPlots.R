@@ -182,7 +182,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 ...)
         }
         if (any(select == "spatialResiduals")) {
-            scale <- 3
+            scale <- 3 * map.cex
             if (is.null(year) || length(year)>1) 
                 stop("a single year must be supplied")
             sel <- which(dat[[2]]$Year == as.character(year))
