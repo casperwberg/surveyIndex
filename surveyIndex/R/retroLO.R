@@ -177,3 +177,21 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
         legend("topleft",legend=names(x),col=cols,lty=1,lwd=lwd,pch=1)
     }
 }
+##' Mohn's rho for retrospective analysis
+##'
+##' @title Mohn's rho for retrospective analysis
+##' @param x SIlist as returned by the 'retro.surveyIdx' function
+##' @param base Object of class 'surveyIdx' (full run with all years)
+##' @return vector with mohn's rho for each age group
+##' @export
+mohn.surveyIdx<-function(x,base){
+    mohns = rep(NA,ncol(base$idx))
+    for(aa in 1:ncol(base$idx)){
+        bias <- sapply(x,function(xx){
+            y <- rownames(xx$idx)[nrow(xx$idx)]
+            (xx$idx[rownames(xx$idx) == y, aa] - base$idx[rownames(base$idx) == y, aa])/base$idx[rownames(base$idx) == y,aa ]
+        })
+        mohns[aa] = mean(bias)
+    }
+  mohns   
+}

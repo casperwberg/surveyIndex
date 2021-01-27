@@ -28,6 +28,7 @@ getSurveyIdx(
   knotsZ = NULL,
   predfix = NULL,
   linkZ = "logit",
+  CIlevel = 0.95,
   ...
 )
 }
@@ -70,7 +71,11 @@ getSurveyIdx(
 
 \item{linkZ}{link function for the binomial part of the model, default: "logit" (not used for Tweedie models).}
 
+\item{CIlevel}{Confidence interval level, defaults to 0.95.}
+
 \item{...}{Optional extra arguments to "gam"}
+
+\item{length)}{}
 }
 \value{
 A survey index (list)
