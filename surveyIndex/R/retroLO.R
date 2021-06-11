@@ -182,16 +182,26 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
 ##' @title Mohn's rho for retrospective analysis
 ##' @param x SIlist as returned by the 'retro.surveyIdx' function
 ##' @param base Object of class 'surveyIdx' (full run with all years)
+##' @param rescale should the indices for each age group be rescaled to have mean 1 over shortest timespan before calculating mohns rho? Only appropriate for purely relative indices.
 ##' @return vector with mohn's rho for each age group
 ##' @export
-mohn.surveyIdx<-function(x,base){
-    mohns = rep(NA,ncol(base$idx))
-    for(aa in 1:ncol(base$idx)){
-        bias <- sapply(x,function(xx){
+mohn.surveyIdx<-function (x, base, rescale=FALSE){
+
+    commonyears = rownames(x[[length(x)]]$idx)
+    if(rescale){
+        for (aa in 1:ncol(base$idx)) {
+            base$idx[,aa] = base$idx[,aa] / mean(base$idx[ rownames(base$idx) %in% commonyears,aa],na.rm=TRUE)
+        }
+    }
+    mohns = rep(NA, ncol(base$idx))
+    for (aa in 1:ncol(base$idx)) {
+        bias <- sapply(x, function(xx) {
+            if(rescale) { xx$idx[,aa] = xx$idx[,aa] / mean(xx$idx[ rownames(xx$idx) %in% commonyears,aa],na.rm=TRUE)
+            }
             y <- rownames(xx$idx)[nrow(xx$idx)]
-            (xx$idx[rownames(xx$idx) == y, aa] - base$idx[rownames(base$idx) == y, aa])/base$idx[rownames(base$idx) == y,aa ]
+            (xx$idx[rownames(xx$idx) == y, aa] - base$idx[rownames(base$idx) == y, aa])/base$idx[rownames(base$idx) == y, aa]
         })
         mohns[aa] = mean(bias)
     }
-  mohns   
+    mohns
 }
