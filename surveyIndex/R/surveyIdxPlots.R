@@ -18,6 +18,8 @@
 ##' @param legend.signif Number of significant digits in map legends
 ##' @param legend.pos Position of legend (e.g. "bottomleft") see ?legend
 ##' @param restoreOldPar restore old par() on exit? Default=FALSE
+##' @param scaleMap scale legend to mean 1 for "absolutemap"? Default: TRUE
+##' @param posProb show probability of non-zero value for "absolutemap" instead of mean 
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -25,7 +27,7 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,scaleMap=TRUE,posProb=FALSE,...) 
 {
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)
@@ -126,12 +128,15 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             else {
                 tmp = predD
             }
+
+            getthis = ifelse(posProb,"gPreds2PA","gPreds2")
+            
             ## collect all years as data.frame
-            ally = data.frame(val=x$gPreds2[[a]][[1]],year=as.character(levels(dat$Year)[1]))
+            ally = data.frame(val=x[[getthis]][[a]][[1]],year=as.character(levels(dat$Year)[1]))
             cc=0
             for(y in levels(dat$Year)){
                 cc=cc+1
-                ally = rbind(ally, data.frame(val=x$gPreds2[[a]][[cc]],
+                ally = rbind(ally, data.frame(val=x[[getthis]][[a]][[cc]],
                                               year=as.character(levels(dat$Year)[cc])))
             }
             ally$conc = surveyIndex:::concTransform(log(ally$val))
@@ -146,7 +151,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 if (legend && yy==year[1]){
                     maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
                     mincuts = aggregate(val ~ zFac, data=ally, FUN=min)
-                    mm = mean(ally$val)
+                    mm = ifelse(scaleMap,mean(ally$val),1)
                     ml = signif(mincuts[,2]/mm,legend.signif)
                     ml[1] = 0
                     leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")

@@ -28,6 +28,7 @@ getSurveyIdx(
   knotsZ = NULL,
   predfix = NULL,
   linkZ = "logit",
+  doProbs = FALSE,
   CIlevel = 0.95,
   ...
 )
@@ -70,6 +71,8 @@ getSurveyIdx(
 \item{predfix}{optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)}
 
 \item{linkZ}{link function for the binomial part of the model, default: "logit" (not used for Tweedie models).}
+
+\item{doProbs}{Calculate presence/absence indices? default: FALSE}
 
 \item{CIlevel}{Confidence interval level, defaults to 0.95.}
 

@@ -25,6 +25,7 @@
 ##' @param knotsZ optional list of knots to gam, presence/absence
 ##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
 ##' @param linkZ link function for the binomial part of the model, default: "logit" (not used for Tweedie models).
+##' @param doProbs Calculate presence/absence indices? default: FALSE
 ##' @param CIlevel Confidence interval level, defaults to 0.95.
 ##' @param ... Optional extra arguments to "gam"
 ##' @return A survey index (list)
@@ -93,7 +94,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=1,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", CIlevel=0.95,...
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", doProbs=FALSE, CIlevel=0.95,...
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
@@ -116,6 +117,7 @@ getSurveyIdx <-
         zModels=list()
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
+        gPreds2PA=list() ## same, but presence absence probs
         allobs=list() ## response vector (zeroes and positive)
         resid=list() ## residuals
         predDc = predD ##copy of predD
@@ -137,6 +139,8 @@ getSurveyIdx <-
         resMat=matrix(NA,nrow=length(yearRange),ncol=length(ages));
         upMat=resMat;
         loMat=resMat;
+        resMat0 <- upMat0 <- loMat0 <- resMat
+        
         do.one.a<-function(a){
             age = which(dataAges==ages[a])
             ddd=x[[2]]; ddd$dum=1.0;
@@ -224,8 +228,10 @@ getSurveyIdx <-
             res=numeric(length(yearRange));
             lores=res;
             upres=res;
+            lores0 <- upres0 <- res0 <- res
             gp2=list()
-            
+            gp2PA=list()
+           
             for(y in levels(ddd$Year)){ 
                 ## take care of years with all zeroes
                 if(!any(ddd$A1[ddd$Year==y]>cutOff)){
@@ -287,6 +293,15 @@ getSurveyIdx <-
                 if(famVec[a]=="LogNormal")  { res[which(as.character(yearRange)==y)] = sum(p.0*exp(p.1+sig2/2)); gPred=p.0*exp(p.1+sig2/2) }
                 if(famVec[a] %in% c("Tweedie","negbin"))  { res[which(as.character(yearRange)==y)] = sum(exp(p.1)); gPred=exp(p.1) }
                 gp2[[y]]=gPred;
+
+                if(doProbs){
+                    if(famVec[a]=="negbin"){
+                        theta = m.pos$family$getTheta(TRUE) ## 'size' param
+                        gp2PA[[y]] = 1 - dnbinom(rep(0,length(p.1)),size=theta,mu=gPred)
+                        res0[which(as.character(yearRange)==y)] = mean(gp2PA[[y]])
+                    }
+                }
+                
                 if(nBoot>10){
                     brp.1=mvrnorm(n=nBoot,coef(m.pos),m.pos$Vp);
                     if(!famVec[a] %in% c("Tweedie","negbin")){
@@ -321,15 +336,29 @@ getSurveyIdx <-
                     halpha = (1-CIlevel)/2
                     upres[which(as.character(yearRange)==y)] = quantile(idxSamp,1-halpha);
                     lores[which(as.character(yearRange)==y)] = quantile(idxSamp,halpha);
+
+                    if(doProbs){
+                        if(famVec[a]=="negbin"){
+                            theta = m.pos$family$getTheta(TRUE) ## 'size' param
+                            gp2PA[[y]] = 1 - dnbinom(rep(0,length(p.1)),size=theta,mu=gPred)
+                            zsamp = apply(rep1,2,function(x){
+                                mean(1 - dnbinom(rep(0,length(x)),size=theta,mu=x))}
+                                )
+                            upres0[which(as.character(yearRange)==y)] = quantile(zsamp,1-halpha);
+                            lores0[which(as.character(yearRange)==y)] = quantile(zsamp,halpha);
+
+                        }
+                    }
                 }
             } ## rof years
-            list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2);
+            list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2,gp2PA=gp2PA,res0=res0,lo0=lores0,up0=upres0);
         }## end do.one
         noAges=length(ages);
         rr=parallel::mclapply(1:noAges,do.one.a,mc.cores=mc.cores);
         logl=0;
         for(a in 1:noAges){
             resMat[,a]=rr[[a]]$res;
+            resMat0[,a]=rr[[a]]$res0;
             zModels[[a]]=rr[[a]]$m0;
             pModels[[a]]=rr[[a]]$m.pos;
             loMat[,a]=rr[[a]]$lo;
@@ -337,13 +366,16 @@ getSurveyIdx <-
             gPreds[[a]]=rr[[a]]$gp;
             logl=logl+rr[[a]]$ll
             gPreds2[[a]]=rr[[a]]$gp2
+            gPreds2PA[[a]]=rr[[a]]$gp2PA
             allobs[[a]]=x[[2]]$Nage[,a]
+            loMat0[,a]=rr[[a]]$lo0;
+            upMat0[,a]=rr[[a]]$up0;
         }
         getEdf<-function(m) sum(m$edf)
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
-        rownames(resMat)<-yearRange
-        colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
+        rownames(resMat)<-rownames(resMat0) <- yearRange
+        colnames(resMat)<-colnames(resMat0) <- ages
+        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,gPreds2PA=gPreds2PA,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel,idx0=resMat0,lo0=loMat0,up0=upMat0);
         class(out) <- "surveyIdx"
         set.seed(314159265) ## reset seed here (in case multicore option is used)
         for(a in 1:noAges) resid[[a]] = residuals(out,a)

@@ -22,6 +22,8 @@ surveyIdxPlots(
   legend.signif = 3,
   legend.pos = "topright",
   restoreOldPar = FALSE,
+  scaleMap = TRUE,
+  posProb = FALSE,
   ...
 )
 }
@@ -59,6 +61,10 @@ surveyIdxPlots(
 \item{legend.pos}{Position of legend (e.g. "bottomleft") see ?legend}
 
 \item{restoreOldPar}{restore old par() on exit? Default=FALSE}
+
+\item{scaleMap}{scale legend to mean 1 for "absolutemap"? Default: TRUE}
+
+\item{posProb}{show probability of non-zero value for "absolutemap" instead of mean}
 
 \item{...}{Additional parameters for plot()}
 }

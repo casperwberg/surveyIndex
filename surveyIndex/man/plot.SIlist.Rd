@@ -4,7 +4,15 @@
 \alias{plot.SIlist}
 \title{Plot survey index list (e.g. retrospective analysis)}
 \usage{
-\method{plot}{SIlist}(x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL, allCI = FALSE)
+\method{plot}{SIlist}(
+  x,
+  base = 1,
+  rescale = FALSE,
+  lwd = 1.5,
+  main = NULL,
+  allCI = FALSE,
+  posProb = FALSE
+)
 }
 \arguments{
 \item{x}{(named) list of "surveyIdx" objects for example from "retro.surveyIdx" or "leaveout.surveyIdx"}
@@ -18,6 +26,8 @@
 \item{main}{if not NULL override main plotting default title of "Age group a"}
 
 \item{allCI}{show 95\% confidence lines for all indices? Default FALSE.}
+
+\item{posProb}{plot non-zero probability instead of indices? Default FALSE.}
 }
 \value{
 nothing

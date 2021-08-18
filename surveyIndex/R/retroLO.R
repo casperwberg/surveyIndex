@@ -109,13 +109,19 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @param lwd line width argument to plot
 ##' @param main if not NULL override main plotting default title of "Age group a"  
 ##' @param allCI show 95\% confidence lines for all indices? Default FALSE.
+##' @param posProb plot non-zero probability instead of indices? Default FALSE.
 ##' @return nothing
 ##' @export
-plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
+plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE,posProb=FALSE){
     if(class(base)=="surveyIdx"){
         x = c( list(base), x)
         base = 1
     }
+
+    if(posProb){
+        x = lapply(x,function(y) { y$idx = y$idx0; y$lo = y$lo0; y$up = y$up0; y } )
+    }
+    
     stopifnot(is.numeric(base))
     nx = length(x)
     mainwasnull = is.null(main)
