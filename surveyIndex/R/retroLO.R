@@ -109,9 +109,11 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @param lwd line width argument to plot
 ##' @param main if not NULL override main plotting default title of "Age group a"  
 ##' @param allCI show 95\% confidence lines for all indices? Default FALSE.
+##' @param includeCI Show confidence intervals? Default TRUE.
+##' @param ylim Y axis range. If NULL (default) then determine automatically.
 ##' @return nothing
 ##' @export
-plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
+plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE,includeCI=TRUE,ylim=NULL){
     if(class(base)=="surveyIdx"){
         x = c( list(base), x)
         base = 1
@@ -143,17 +145,27 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
     ss <- ssbase <- 1
         
     for(aa in 1:n){
-        yl = range( c(x[[base]]$lo[,aa],x[[base]]$up[,aa],x[[base]]$idx[,aa]) )
+        
+        rangevec = x[[1]]$idx[,aa]
+        for(xx in 2:nx) rangevec = c(rangevec,x[[xx]]$idx[,aa])
+        if(includeCI){
+            for(xx in 1:nx) rangevec = c(rangevec,x[[xx]]$lo[,aa],x[[xx]]$up[,aa])
+        }
+        
+        yl = range(rangevec)
         if(rescale){
             rsidx = which(rownames(x[[base]]$idx) %in% commonyears )
             ssbase =  mean( x[[base]]$idx[rsidx,aa], na.rm=TRUE)
             yl = yl/ssbase
         }
+        if(!is.null(ylim)) yl = ylim
+        
         if(mainwasnull) main <- paste("Age group", colnames(x[[base]]$idx)[aa])
         y = as.numeric(rownames(x[[base]]$idx))
         plot(y,x[[base]]$idx[,aa]/ssbase,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
-    
-        polygon(c(y, rev(y)), c(x[[base]]$lo[,aa], rev(x[[base]]$up[,aa]))/ssbase, col = "lightgrey", border = NA)
+
+        if(includeCI)
+            polygon(c(y, rev(y)), c(x[[base]]$lo[,aa], rev(x[[base]]$up[,aa]))/ssbase, col = "lightgrey", border = NA)
         
         for(i in 1:length(x)){
             y = as.numeric(rownames(x[[i]]$idx))
@@ -163,7 +175,7 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE){
             }
             lines(y,x[[i]]$idx[,aa]/ss,col=cols[i],type="b", lwd=lwd)
 
-            if(allCI && i!=base){
+            if(includeCI && allCI && i!=base){
                 lines(y,x[[i]]$lo[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
                 lines(y,x[[i]]$up[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
             }   
@@ -201,7 +213,7 @@ mohn.surveyIdx<-function (x, base, rescale=FALSE){
             y <- rownames(xx$idx)[nrow(xx$idx)]
             (xx$idx[rownames(xx$idx) == y, aa] - base$idx[rownames(base$idx) == y, aa])/base$idx[rownames(base$idx) == y, aa]
         })
-        mohns[aa] = mean(bias)
+        mohns[aa] = mean(bias, na.rm=TRUE)
     }
     mohns
 }
