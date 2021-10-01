@@ -26,12 +26,12 @@ function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
         dif=setdiff(zNam,pNam);
         remo = which(zNam %in% dif)
         if(length(remo)>0) shipSelZ = shipSelZ[-remo];
-        
+
         if(length(shipSelP)!=length(shipSelZ)) { print("unequal number of ship effects"); }
 
-        
-        brp.1=mvrnorm(n=nboot,coef(x$pModels[[a]]),x$pModels[[a]]$Vp);
-        brp.0=mvrnorm(n=nboot,coef(x$zModels[[a]]),x$zModels[[a]]$Vp);
+
+        brp.1=MASS::mvrnorm(n=nboot,coef(x$pModels[[a]]),x$pModels[[a]]$Vp);
+        brp.0=MASS::mvrnorm(n=nboot,coef(x$zModels[[a]]),x$zModels[[a]]$Vp);
 
         shipE = exp(brp.1[,shipSelP,drop=FALSE]);
         if(!pOnly) shipE = shipE*x$zModels[[a]]$family$linkinv(brp.0[,shipSelZ,drop=FALSE])
@@ -40,7 +40,7 @@ function(x,dat,parName="Gear",cutOff,nboot=1000,pOnly=FALSE){
         lores  = apply(shipE,2, quantile,probs=0.025);
 
         tmp=cbind(colMeans(shipE),upres,lores);
-        
+
         res[[a]]=tmp;
     }
     return(res);
