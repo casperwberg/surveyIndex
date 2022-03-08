@@ -133,6 +133,7 @@ getSurveyIdx <-
         ## Choose most frequent gear as reference gear
         gearNames=names(xtabs(~Gear,data=x[[2]]))
         myGear=names(xtabs(~Gear,data=x[[2]]))[which.max(xtabs(~Gear,data=x[[2]]))]
+        if(!is.null(predfix$Gear)) myGear = predfix$Gear
         
         resMat=matrix(NA,nrow=length(yearRange),ncol=length(ages));
         upMat=resMat;
