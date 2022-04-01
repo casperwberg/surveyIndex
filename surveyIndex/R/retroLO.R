@@ -8,7 +8,7 @@
 ##' @return SIlist (list of surveyIndex objects)
 ##' @param ... Optional extra arguments to "gam"
 ##' @export
-retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,...){
+retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,nBoot=1000,...){
     if(is.null(predD)){
         predD = subset(d, haul.id %in% grid[[3]])
         predD = predD[[2]]
@@ -46,7 +46,7 @@ retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,...){
                       )
 
         cat("Peel ",i, ": re-fitting using years ",levels(curd$Year),"\n")
-        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=0,modelP=mp,modelZ=mz,...) 
+        res[[i]] = getSurveyIdx(curd,ages,myids=NULL,predD=predD,cutOff=cutOff,fam=famVec,method=model$pModels[[1]]$method,knotsP=model$knotsP,knotsZ=model$knotsZ,predfix=predfix,nBoot=nBoot,modelP=mp,modelZ=mz,...) 
     }
 
     class(res)<-"SIlist"
