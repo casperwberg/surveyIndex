@@ -5,8 +5,10 @@
 ##' @param d DATRASraw dataset
 ##' @param grid surveyIndexGrid object (see getGrid) defining the grid.
 ##' @param npeels number of years to successively peel of the data set
-##' @return SIlist (list of surveyIndex objects)
+##' @param predD alternative way of specifiyng the grid (see getSurveyIdx function)
+##' @param nBoot number of bootstrap samples used for calculating index confidence intervals
 ##' @param ... Optional extra arguments to "gam"
+##' @return SIlist (list of surveyIndex objects)
 ##' @export
 retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,nBoot=1000,...){
     if(is.null(predD)){

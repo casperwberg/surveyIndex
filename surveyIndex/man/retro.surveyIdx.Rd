@@ -4,7 +4,7 @@
 \alias{retro.surveyIdx}
 \title{Make retrospective analysis for a "surveyIdx" model.}
 \usage{
-retro.surveyIdx(model, d, grid, npeels = 5, predD = NULL, ...)
+retro.surveyIdx(model, d, grid, npeels = 5, predD = NULL, nBoot = 1000, ...)
 }
 \arguments{
 \item{model}{object of class "surveyIdx" as created by "getSurveyIdx"}
@@ -14,6 +14,10 @@ retro.surveyIdx(model, d, grid, npeels = 5, predD = NULL, ...)
 \item{grid}{surveyIndexGrid object (see getGrid) defining the grid.}
 
 \item{npeels}{number of years to successively peel of the data set}
+
+\item{predD}{alternative way of specifiyng the grid (see getSurveyIdx function)}
+
+\item{nBoot}{number of bootstrap samples used for calculating index confidence intervals}
 
 \item{...}{Optional extra arguments to "gam"}
 }
