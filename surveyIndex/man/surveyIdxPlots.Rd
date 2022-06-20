@@ -22,6 +22,8 @@ surveyIdxPlots(
   legend.signif = 3,
   legend.pos = "topright",
   restoreOldPar = FALSE,
+  mapBubbles = FALSE,
+  cutp = NULL,
   ...
 )
 }
@@ -36,7 +38,7 @@ surveyIdxPlots(
 
 \item{cols}{which age columns to consider?}
 
-\item{select}{character vector of chosen plots. Either one of "index","map","absolutemap","residuals","fitVsRes",""resVsYear","resVsShip","spatialResiduals", or a number. Numbers refer to smooths in the order they appear in the formula.}
+\item{select}{character vector of chosen plots. Either one of "index","map","absolutemap","CVmap","residuals","fitVsRes",""resVsYear","resVsShip","spatialResiduals", or a number. Numbers refer to smooths in the order they appear in the formula.}
 
 \item{par}{'par' settings for plotting (a named list).}
 
@@ -50,7 +52,7 @@ surveyIdxPlots(
 
 \item{predD}{DATRASraw object with grid (optional). Overrides 'myids' if supplied.}
 
-\item{year}{numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' year must be a vector.}
+\item{year}{numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' or 'CVmap' then year must be a vector.}
 
 \item{main}{optional main title (overrides default title)}
 
@@ -59,6 +61,10 @@ surveyIdxPlots(
 \item{legend.pos}{Position of legend (e.g. "bottomleft") see ?legend}
 
 \item{restoreOldPar}{restore old par() on exit? Default=FALSE}
+
+\item{mapBubbles}{boolean (default=FALSE) add observation bubbles?}
+
+\item{cutp}{optional vector of break points for the color scale on maps}
 
 \item{...}{Additional parameters for plot()}
 }

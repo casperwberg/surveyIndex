@@ -116,6 +116,7 @@ getSurveyIdx <-
         zModels=list()
         gPreds=list() ##last data year's predictions
         gPreds2=list() ## all years predictions
+        gPreds2.CV=list() ## coefficient of variation of previous 
         allobs=list() ## response vector (zeroes and positive)
         resid=list() ## residuals
         predDc = predD ##copy of predD
@@ -226,6 +227,7 @@ getSurveyIdx <-
             lores=res;
             upres=res;
             gp2=list()
+            gp2.cv=list()
             
             for(y in levels(ddd$Year)){ 
                 ## take care of years with all zeroes
@@ -316,15 +318,19 @@ getSurveyIdx <-
 
                     if(!famVec[a] %in% c("Tweedie","negbin")){
                         idxSamp = colSums(rep0*rep1);
+                        gp.sd = apply(rep0*rep1,1,sd)
+                        gp2.cv[[y]] = gp.sd / gPred 
                     } else {
                         idxSamp = colSums(rep1);
+                        gp.sd = apply(rep1,1,sd)
+                        gp2.cv[[y]] = gp.sd / gPred
                     }
                     halpha = (1-CIlevel)/2
-                    upres[which(as.character(yearRange)==y)] = quantile(idxSamp,1-halpha);
-                    lores[which(as.character(yearRange)==y)] = quantile(idxSamp,halpha);
+                    upres[which(as.character(yearRange)==y)] = quantile(idxSamp,1-halpha,na.rm=TRUE);
+                    lores[which(as.character(yearRange)==y)] = quantile(idxSamp,halpha,na.rm=TRUE);
                 }
             } ## rof years
-            list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2);
+            list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=gPred,ll=totll,pd=pd,gp2=gp2,gp2.cv=gp2.cv);
         }## end do.one
         noAges=length(ages);
         rr=parallel::mclapply(1:noAges,do.one.a,mc.cores=mc.cores);
@@ -338,13 +344,14 @@ getSurveyIdx <-
             gPreds[[a]]=rr[[a]]$gp;
             logl=logl+rr[[a]]$ll
             gPreds2[[a]]=rr[[a]]$gp2
+            gPreds2.CV[[a]]=rr[[a]]$gp2.cv
             allobs[[a]]=x[[2]]$Nage[,a]
         }
         getEdf<-function(m) sum(m$edf)
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
         rownames(resMat)<-yearRange
         colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
+        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,gPreds2.CV = gPreds2.CV, family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
         class(out) <- "surveyIdx"
         set.seed(314159265) ## reset seed here (in case multicore option is used)
         for(a in 1:noAges) resid[[a]] = residuals(out,a)
@@ -366,7 +373,7 @@ getSurveyIdx <-
 ##' @return An object of class "surveyIdx"
 ##' @importFrom MASS mvrnorm
 ##' @export
-redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1){        
+redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.cores=1){        
     ages = as.numeric(colnames(model$idx))
     dataAges <- model$dataAges
     famVec = model$family
@@ -377,6 +384,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
 
     gPreds=list() ##last data year's predictions
     gPreds2=list() ## all years predictions
+    gPreds2.CV=list()
     predDc = predD
     
     myGear=model$refGear 
@@ -396,6 +404,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
         lores=res;
         upres=res;
         gp2=list()
+        gp2.cv=list()
         do.one.y<-function(y){
             
             cat("Doing year ",y,"\n")
@@ -405,7 +414,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
 
             ## take care of years with all zeroes
             if(!any(ddd$A1[ddd$Year==y]>cutOff)){
-                return(list(res=0,upres=0,lores=0,gp2=NULL))
+                return(list(res=0,upres=0,lores=0,gp2=NULL,gp2.cv=NULL))
             }
 
             ## OBS: effects that should be removed should be included here
@@ -448,7 +457,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
             });
             ## take care of failing predictions
             if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
-                return(list(res=0,upres=0,lores=0,gp2=NULL))
+                return(list(res=0,upres=0,lores=0,gp2=NULL,gp2.cv=NULL))
             }
             sig2=m.pos$sig2;
             idx = NA
@@ -488,11 +497,15 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
 
                 if(!famVec[a] %in% c("Tweedie","negbin")){
                     idxSamp = colSums(rep0*rep1);
+                    gp.sd = apply(rep0*rep1,1,sd)
+                    gp.cv = gp.sd / gPred 
                 } else {
                     idxSamp = colSums(rep1);
+                    gp.sd = apply(rep1,1,sd)
+                    gp.cv = gp.sd / gPred
                 }
                 halpha = (1-model$CIlevel)/2
-                return(list(res=idx,upres=quantile(idxSamp,1-halpha),lores=quantile(idxSamp,halpha),gp2=gPred))
+                return(list(res=idx,upres=quantile(idxSamp,1-halpha,na.rm=TRUE),lores=quantile(idxSamp,halpha,na.rm=TRUE),gp2=gPred,gp2.cv=gp.cv))
             }
         } ## rof years
         yres = parallel::mclapply(levels(ddd$Year),do.one.y,mc.cores=mc.cores)
@@ -501,9 +514,10 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
             res[ii] = yres[[ii]]$res
             upres[ii] = yres[[ii]]$upres
             lores[ii] = yres[[ii]]$lores
-            gp2[[y]] = yres[[ii]]$gp2            
+            gp2[[y]] = yres[[ii]]$gp2
+            gp2.cv[[y]] = yres[[ii]]$gp2.cv
         }
-        list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=tail(gp2,1),gp2=gp2);
+        list(res=res,m.pos=m.pos,m0=m0,lo=lores,up=upres,gp=tail(gp2,1),gp2=gp2,gp2.cv=gp2.cv);
     }## end do.one
     noAges=length(ages);
     rr=lapply(1:noAges,do.one.a);
@@ -514,10 +528,11 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix,mc.cores=1
         upMat[,a]=rr[[a]]$up;
         gPreds[[a]]=rr[[a]]$gp;
         gPreds2[[a]]=rr[[a]]$gp2
+        gPreds2.CV[[a]]=rr[[a]]$gp2.cv
     }
     rownames(resMat)<-yearRange
     colnames(resMat)<-ages
-    out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,
+    out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,gPreds2.CV=gPreds2.CV,
                 family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=model$knotsP, knotsZ=model$knotsZ);
     class(out) <- "surveyIdx"
     out

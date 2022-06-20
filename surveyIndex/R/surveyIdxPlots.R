@@ -6,18 +6,20 @@
 ##' @param alt.idx optional matrix with alternative index
 ##' @param myids vector of haul ids that constitute the grid
 ##' @param cols which age columns to consider?
-##' @param select character vector of chosen plots. Either one of "index","map","absolutemap","residuals","fitVsRes",""resVsYear","resVsShip","spatialResiduals", or a number. Numbers refer to smooths in the order they appear in the formula.
+##' @param select character vector of chosen plots. Either one of "index","map","absolutemap","CVmap","residuals","fitVsRes",""resVsYear","resVsShip","spatialResiduals", or a number. Numbers refer to smooths in the order they appear in the formula.
 ##' @param par 'par' settings for plotting (a named list).
 ##' @param colors colors for spatial effect.
 ##' @param map.cex size of grid points on maps
 ##' @param plotByAge boolean (default=TRUE). If true, par(par) is called for each age group.
 ##' @param legend boolean (default=TRUE). add legends to plot?
 ##' @param predD DATRASraw object with grid (optional). Overrides 'myids' if supplied.
-##' @param year numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' year must be a vector. 
+##' @param year numeric scalar or vector (default=NULL). If 'select' equals 'map' a specific year can be chosen (only meaningful for time-varying spatial effects). If select equals 'absolutemap' or 'CVmap' then year must be a vector. 
 ##' @param main optional main title (overrides default title)
 ##' @param legend.signif Number of significant digits in map legends
 ##' @param legend.pos Position of legend (e.g. "bottomleft") see ?legend
 ##' @param restoreOldPar restore old par() on exit? Default=FALSE
+##' @param mapBubbles boolean (default=FALSE) add observation bubbles?
+##' @param cutp optional vector of break points for the color scale on maps
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -25,7 +27,7 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL, ...) 
 {
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)
@@ -115,45 +117,64 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
             }
         }
-        if (any(select == "absolutemap")) {
+        if (any(select == "absolutemap") || any(select == "CVmap")) {
             if(is.null(year) || length(year)<1) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
             if( !all(year %in% levels(dat$Year)) ) stop("invalid years selected")
             xlims = range(dat$lon, na.rm = TRUE)
             ylims = range(dat$lat, na.rm = TRUE)
-            if (is.null(predD)) {
-                tmp = subset(dat, haul.id %in% myids)
-            }
-            else {
-                tmp = predD
-            }
+
+            if(any(select == "absolutemap")) colsel = "gPreds2" else colsel = "gPreds2.CV" 
             ## collect all years as data.frame
-            ally = data.frame(val=x$gPreds2[[a]][[1]],year=as.character(levels(dat$Year)[1]))
+            ally = data.frame(val=x[[colsel]][[a]][[1]],year=as.character(levels(dat$Year)[1]))
             cc=0
             for(y in levels(dat$Year)){
                 cc=cc+1
-                ally = rbind(ally, data.frame(val=x$gPreds2[[a]][[cc]],
+                ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[cc]],
                                               year=as.character(levels(dat$Year)[cc])))
             }
             ally$conc = surveyIndex:::concTransform(log(ally$val))
-            ally$zFac=cut( ally$conc,0:length(colors)/length(colors))
+            if(is.null(cutp)){
+                ally$zFac=cut( ally$conc,0:length(colors)/length(colors))
+            } else {
+                if(length(cutp) != length(colors) + 1) stop("incompatible number of colors and length of cutp") 
+                ally$zFac=cut( ally$val,cutp)
+            }
+            bubbleScale = 0.005*max(dat$Nage[,a])
             for(yy in year){
+
+                if (is.null(predD)) {
+                    tmp = subset(dat, haul.id %in% myids)
+                }
+                else {
+                    tmp = predD
+                    if(is.list(tmp) && !class(tmp)%in%c("data.frame","DATRASraw")) tmp = predD[[as.character(yy)]]
+                }
+                
                 plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex,xlab="Longitude",ylab="Latitude",axes=FALSE)
                 box()
                 title(yy,line=1)
                 sel = which(ally$year==yy)
                 points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=16,cex=map.cex)
                 maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
-                if (legend && yy==year[1]){
-                    maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
-                    mincuts = aggregate(val ~ zFac, data=ally, FUN=min)
-                    mm = mean(ally$val)
-                    ml = signif(mincuts[,2]/mm,legend.signif)
-                    ml[1] = 0
-                    leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
-                    legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
+                if(mapBubbles){
+                    dy = subset(dat,Year==yy)
+                    points(dy$lon,dy$lat,cex=sqrt(dy$Nage[,a]/bubbleScale))
                 }
-            }
-        }
+                if (legend && yy==year[1]){
+                    if(is.null(cutp)){
+                        maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
+                        mincuts = aggregate(val ~ zFac, data=ally, FUN=min)
+                        mm = mean(ally$val)
+                        ml = signif(mincuts[,2]/mm,legend.signif)
+                        ml[1] = 0
+                        leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
+                        legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
+                    }
+                    legend(legend.pos, legend = levels(ally$zFac), pch = 16, col = colors, bg = "white")
+                }
+            }##rof year
+        }## absolutemap
+        
         for (k in 1:length(select)) {
             ss = suppressWarnings(as.numeric(select[k]))
             if (!is.na(ss)) {
