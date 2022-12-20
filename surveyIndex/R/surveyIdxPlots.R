@@ -118,19 +118,21 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             }
         }
         if (any(select == "absolutemap") || any(select == "CVmap")) {
-            if(is.null(year) || length(year)<1) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
+            if(is.null(year) || length(year)==0) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
             if( !all(year %in% levels(dat$Year)) ) stop("invalid years selected")
+            
             xlims = range(dat$lon, na.rm = TRUE)
             ylims = range(dat$lat, na.rm = TRUE)
 
             if(any(select == "absolutemap")) colsel = "gPreds2" else colsel = "gPreds2.CV" 
+            goodyears = intersect(year,names(x[[colsel]][[a]])) 
             ## collect all years as data.frame
-            ally = data.frame(val=x[[colsel]][[a]][[1]],year=as.character(levels(dat$Year)[1]))
+            ally = data.frame(val = numeric(0), year = character(0))
             cc=0
-            for(y in levels(dat$Year)){
+            for(y in goodyears){
                 cc=cc+1
                 ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[cc]],
-                                              year=as.character(levels(dat$Year)[cc])))
+                                              year=names(x[[colsel]][[a]])[cc] ))
             }
             ally$conc = surveyIndex:::concTransform(log(ally$val))
             if(is.null(cutp)){
@@ -141,7 +143,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             }
             bubbleScale = 0.005*max(dat$Nage[,a])
             for(yy in year){
-
+                sel = which(ally$year == yy)
                 if (is.null(predD)) {
                     tmp = subset(dat, haul.id %in% myids)
                 }
@@ -150,10 +152,10 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                     if(is.list(tmp) && !class(tmp)%in%c("data.frame","DATRASraw")) tmp = predD[[as.character(yy)]]
                 }
                 
-                plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex,xlab="Longitude",ylab="Latitude",axes=FALSE)
+                plot(tmp$lon,y=tmp$lat,col=1,pch=1,cex=map.cex,xlab="Longitude",ylab="Latitude",axes=FALSE,type=ifelse(length(sel)>0,"p","n"))
                 box()
                 title(yy,line=1)
-                sel = which(ally$year==yy)
+                if(length(sel)==0) next;
                 points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=16,cex=map.cex)
                 maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
                 if(mapBubbles){
@@ -169,8 +171,8 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                         ml[1] = 0
                         leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
                         legend(legend.pos, legend = leg, pch = 16, col = colors, bg = "white")
-                    }
-                    legend(legend.pos, legend = levels(ally$zFac), pch = 16, col = colors, bg = "white")
+                    } else {
+                        legend(legend.pos, legend = levels(ally$zFac), pch = 16, col = colors, bg = "white")          }
                 }
             }##rof year
         }## absolutemap
@@ -222,3 +224,21 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
     }
 }
 
+##' @export
+factorplot<-function(x, name, invlink=exp, levs=NULL,... ){
+    sel<- grep( name, names(coef(x))) 
+    est <- coef(x)[ sel ]
+    sds <- sqrt(diag( vcov(x) ))[ sel ]
+    lo <- invlink(est - 2*sds)
+    hi <- invlink(est + 2*sds)
+    ylims <- range(c(lo,hi))
+    xs <- 1:length(est)
+
+    nams <- names(est)
+    if(!is.null(levs)) nams <- levs
+    op <- par(las=2)
+    on.exit(par(op))
+    plot( xs, invlink(est), ylim=ylims,...,xaxt="n",xlab="", ylab="Estimate")
+    axis(1,labels=nams,at=xs)
+    arrows( xs,lo,y1=hi,angle=90,code=3,length=0.1)
+}

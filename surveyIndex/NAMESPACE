@@ -2,11 +2,13 @@
 
 S3method(plot,SIlist)
 S3method(plot,surveyIndexGrid)
+S3method(print,surveyIdx)
 S3method(residuals,surveyIdx)
 export(AIC.surveyIdx)
 export(anova.SI)
 export(exportSI)
 export(externalCons)
+export(factorplot)
 export(fixAgeGroup)
 export(getBathyGrid)
 export(getEffect)

@@ -318,12 +318,18 @@ getSurveyIdx <-
 
                     if(!famVec[a] %in% c("Tweedie","negbin")){
                         idxSamp = colSums(rep0*rep1);
-                        gp.sd = apply(rep0*rep1,1,sd)
-                        gp2.cv[[y]] = gp.sd / gPred 
+                        ##gp.sd = apply(rep0*rep1,1,sd)
+                        ##gp.sd = apply(log(rep0*rep1),1,sd)
+                        ##gp2.cv[[y]] = gp.sd / gPred
+                        ##gp2.cv[[y]] = sqrt( exp(gp.sd)^2 - 1)
+                        gp2.cv[[y]] = apply(log(rep0*rep1),1,sd)
                     } else {
                         idxSamp = colSums(rep1);
-                        gp.sd = apply(rep1,1,sd)
-                        gp2.cv[[y]] = gp.sd / gPred
+                        ##gp.sd = apply(rep1,1,sd)
+                        ##gp.sd = apply(log(rep1),1,sd)
+                        ##gp2.cv[[y]] = gp.sd / gPred
+                        ##gp2.cv[[y]] = sqrt( exp(gp.sd)^2 - 1)
+                        gp2.cv[[y]] = apply(log(rep1),1,sd)
                     }
                     halpha = (1-CIlevel)/2
                     upres[which(as.character(yearRange)==y)] = quantile(idxSamp,1-halpha,na.rm=TRUE);
@@ -349,9 +355,10 @@ getSurveyIdx <-
         }
         getEdf<-function(m) sum(m$edf)
         totEdf=sum( unlist( lapply(zModels,getEdf))) + sum( unlist( lapply(pModels,getEdf)));
-        rownames(resMat)<-yearRange
-        colnames(resMat)<-ages
-        out <- list(idx=resMat,zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,gPreds2.CV = gPreds2.CV, family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
+        idx.CV=(log(upMat)-log(loMat))/4
+        rownames(resMat) <- rownames(loMat) <- rownames(upMat) <- rownames(idx.CV) <- yearRange
+        colnames(resMat) <- colnames(loMat) <- colnames(upMat) <- colnames(idx.CV) <- ages
+        out <- list(idx=resMat,idx.CV = idx.CV, zModels=zModels,pModels=pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=logl,edfs=totEdf,gPreds2=gPreds2,gPreds2.CV = gPreds2.CV, family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=knotsP, knotsZ=knotsZ, allobs=allobs,CIlevel=CIlevel);
         class(out) <- "surveyIdx"
         set.seed(314159265) ## reset seed here (in case multicore option is used)
         for(a in 1:noAges) resid[[a]] = residuals(out,a)
@@ -497,12 +504,14 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.
 
                 if(!famVec[a] %in% c("Tweedie","negbin")){
                     idxSamp = colSums(rep0*rep1);
-                    gp.sd = apply(rep0*rep1,1,sd)
-                    gp.cv = gp.sd / gPred 
+                    ##gp.sd = apply(rep0*rep1,1,sd)
+                    ##gp.cv = gp.sd / gPred
+                    gp.cv = apply(log(rep0*rep1),1,sd)
                 } else {
                     idxSamp = colSums(rep1);
-                    gp.sd = apply(rep1,1,sd)
-                    gp.cv = gp.sd / gPred
+                    ##gp.sd = apply(rep1,1,sd)
+                    ##gp.cv = gp.sd / gPred
+                    gp.cv = apply(log(rep1),1,sd)
                 }
                 halpha = (1-model$CIlevel)/2
                 return(list(res=idx,upres=quantile(idxSamp,1-halpha,na.rm=TRUE),lores=quantile(idxSamp,halpha,na.rm=TRUE),gp2=gPred,gp2.cv=gp.cv))
@@ -530,11 +539,24 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.
         gPreds2[[a]]=rr[[a]]$gp2
         gPreds2.CV[[a]]=rr[[a]]$gp2.cv
     }
-    rownames(resMat)<-yearRange
-    colnames(resMat)<-ages
-    out <- list(idx=resMat,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,gPreds2.CV=gPreds2.CV,
+    idx.CV=(log(upMat)-log(loMat))/4
+    rownames(resMat) <- rownames(loMat) <- rownames(upMat) <- rownames(idx.CV) <- yearRange
+    colnames(resMat) <- colnames(loMat) <- colnames(upMat) <- colnames(idx.CV) <- ages
+    out <- list(idx=resMat,idx.CV=idx.CV,zModels=model$zModels,pModels=model$pModels,lo=loMat,up=upMat,gPreds=gPreds,logLik=model$logLik,edfs=model$edfs,pData=model$pData,gPreds2=gPreds2,gPreds2.CV=gPreds2.CV,
                 family=famVec, cutOff=cutOff, dataAges=dataAges, yearNum=yearNum, refGear=myGear, predfix = predfix, knotsP=model$knotsP, knotsZ=model$knotsZ);
     class(out) <- "surveyIdx"
     out
 }
 
+##' @export
+print.surveyIdx <- function(x){
+    cat("Object of class 'surveyIdx'\n")
+    cat("Family :", x$family,"\n")
+    cat("Number of age groups: ",length(x$pModels),"\n")
+    cat("Log-likelihood: ", x$logLik,"\n")
+    cat("Effective degrees of freedom:",x$edfs,"\n")
+    cat("CutOff value",x$cutOff,"\n")
+    cat("===========================\n")
+    print(x$idx)
+    
+}
