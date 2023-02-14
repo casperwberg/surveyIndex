@@ -149,7 +149,7 @@ plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE,inc
     for(aa in 1:n){
         
         rangevec = x[[1]]$idx[,aa]
-        for(xx in 2:nx) rangevec = c(rangevec,x[[xx]]$idx[,aa])
+        if(nx>1) { for(xx in 2:nx) rangevec = c(rangevec,x[[xx]]$idx[,aa]) }
         if(includeCI){
             for(xx in 1:nx) rangevec = c(rangevec,x[[xx]]$lo[,aa],x[[xx]]$up[,aa])
         }
