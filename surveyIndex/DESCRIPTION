@@ -1,8 +1,8 @@
 Package: surveyIndex
 Type: Package
 Title: Calculate survey indices of abundance from DATRAS exchange data.
-Version: 1.09
-Date: 2020-28-09
+Version: 1.10
+Date: 2023-04-06
 Author: Casper W. Berg
 Maintainer: Casper W. Berg <cbe@aqua.dtu.dk>
 Description: This is an implementation of the methods described in
