@@ -115,80 +115,100 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @param ylim Y axis range. If NULL (default) then determine automatically.
 ##' @return nothing
 ##' @export
-plot.SIlist<-function(x, base=1, rescale=FALSE,lwd=1.5,main=NULL,allCI=FALSE,includeCI=TRUE,ylim=NULL){
-    if(class(base)=="surveyIdx"){
-        x = c( list(base), x)
+plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL, 
+    allCI = FALSE, includeCI = TRUE, ylim = NULL){
+    if (class(base) == "surveyIdx") {
+        x = c(list(base), x)
         base = 1
     }
     stopifnot(is.numeric(base))
     nx = length(x)
     mainwasnull = is.null(main)
     n = ncol(x[[base]]$idx)
-    if(n>1){
-        op <- par(mfrow=n2mfrow(n))
+    if (n > 1) {
+        op <- par(mfrow = n2mfrow(n))
         on.exit(par(op))
     }
-
-    cols = rainbow(nx) 
-    if(nx==2) cols = 2:3 
+    cols = rainbow(nx)
+    if (nx == 2) 
+        cols = 2:3
     cols[base] = "black"
     allyears = lapply(x, function(x) rownames(x$idx))
     rsidx = 1:nrow(x[[nx]]$idx)
-    if(rescale){
+    if (rescale) {
         commonyears = allyears[[1]]
-        if(nx>1){
-            for(i in 2:nx){
-                commonyears = intersect(commonyears,allyears[[i]])
+        if (nx > 1) {
+            for (i in 2:nx) {
+                commonyears = intersect(commonyears, allyears[[i]])
             }
-            if(length(commonyears)==0) stop("rescaling not possible because the set of common years is empty")
+            if (length(commonyears) == 0) 
+                stop("rescaling not possible because the set of common years is empty")
         }
     }
-    
     ss <- ssbase <- 1
-        
-    for(aa in 1:n){
-        
-        rangevec = x[[1]]$idx[,aa]
-        if(nx>1) { for(xx in 2:nx) rangevec = c(rangevec,x[[xx]]$idx[,aa]) }
-        if(includeCI){
-            for(xx in 1:nx) rangevec = c(rangevec,x[[xx]]$lo[,aa],x[[xx]]$up[,aa])
-        }
-        
-        yl = range(rangevec)
+    
+    for (aa in 1:n) {
         if(rescale){
-            rsidx = which(rownames(x[[base]]$idx) %in% commonyears )
-            ssbase =  mean( x[[base]]$idx[rsidx,aa], na.rm=TRUE)
-            yl = yl/ssbase
-        }
-        if(!is.null(ylim)) yl = ylim
-        
-        if(mainwasnull) main <- paste("Age group", colnames(x[[base]]$idx)[aa])
-        y = as.numeric(rownames(x[[base]]$idx))
-        plot(y,x[[base]]$idx[,aa]/ssbase,type="b",ylim=yl,main=main,xlab="Year",ylab="Index")
-
-        if(includeCI)
-            polygon(c(y, rev(y)), c(x[[base]]$lo[,aa], rev(x[[base]]$up[,aa]))/ssbase, col = "lightgrey", border = NA)
-        
-        for(i in 1:length(x)){
-            y = as.numeric(rownames(x[[i]]$idx))
-            if(rescale){
-                rsidx = which(rownames(x[[i]]$idx) %in% commonyears )
-                ss = mean( x[[i]]$idx[rsidx,aa], na.rm=TRUE)
-            }
-            lines(y,x[[i]]$idx[,aa]/ss,col=cols[i],type="b", lwd=lwd)
-
-            if(includeCI && allCI && i!=base){
-                lines(y,x[[i]]$lo[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
-                lines(y,x[[i]]$up[,aa]/ss,col=cols[i],lwd=lwd*0.6,lty=2)
-            }   
+            rsidx = which(rownames(x[[1]]$idx) %in% commonyears)
+            ss <- mean(x[[1]]$idx[rsidx, aa], na.rm = TRUE)
             
         }
-        y = as.numeric(rownames(x[[base]]$idx))
-        lines(y,x[[base]]$idx[,aa]/ssbase,type="b",lwd=lwd)
+        rangevec = x[[1]]$idx[, aa] / ss
+        if (nx > 1) {
+            for (xx in 2:nx){
+                if(rescale){
+                    rsidx = which(rownames(x[[xx]]$idx) %in% commonyears)
+                    ss <- mean(x[[xx]]$idx[rsidx, aa], na.rm = TRUE)
+                }
+                rangevec = c(rangevec, x[[xx]]$idx[,aa]/ss)
+            }
+        }
+        if (includeCI) {
+            for (xx in 1:nx){
+                if(rescale){
+                    rsidx = which(rownames(x[[xx]]$idx) %in% commonyears)
+                    ss <- mean(x[[xx]]$idx[rsidx, aa], na.rm = TRUE)
+                }
+                rangevec = c(rangevec, x[[xx]]$lo[,aa]/ss, x[[xx]]$up[, aa]/ss)
+            }
+        }
+        yl = range(rangevec)
+        if(rescale){
+            rsidx = which(rownames(x[[base]]$idx) %in% commonyears)
+            ssbase = mean(x[[base]]$idx[rsidx, aa], na.rm = TRUE)
+        }
         
+        if (!is.null(ylim)) 
+            yl = ylim
+        if (mainwasnull) 
+            main <- paste("Age group", colnames(x[[base]]$idx)[aa])
+        y = as.numeric(rownames(x[[base]]$idx))
+        plot(y, x[[base]]$idx[, aa]/ssbase, type = "b", ylim = yl, 
+            main = main, xlab = "Year", ylab = "Index")
+        if (includeCI) 
+            polygon(c(y, rev(y)), c(x[[base]]$lo[, aa], rev(x[[base]]$up[, 
+                aa]))/ssbase, col = "lightgrey", border = NA)
+        for (i in 1:length(x)) {
+            y = as.numeric(rownames(x[[i]]$idx))
+            if (rescale) {
+                rsidx = which(rownames(x[[i]]$idx) %in% commonyears)
+                ss = mean(x[[i]]$idx[rsidx, aa], na.rm = TRUE)
+            }
+            lines(y, x[[i]]$idx[, aa]/ss, col = cols[i], type = "b", 
+                lwd = lwd)
+            if (includeCI && allCI && i != base) {
+                lines(y, x[[i]]$lo[, aa]/ss, col = cols[i], lwd = lwd * 
+                  0.6, lty = 2)
+                lines(y, x[[i]]$up[, aa]/ss, col = cols[i], lwd = lwd * 
+                  0.6, lty = 2)
+            }
+        }
+        y = as.numeric(rownames(x[[base]]$idx))
+        lines(y, x[[base]]$idx[, aa]/ssbase, type = "b", lwd = lwd)
     }
-    if(!is.null(names(x))){
-        legend("topleft",legend=names(x),col=cols,lty=1,lwd=lwd,pch=1)
+    if (!is.null(names(x))) {
+        legend("topleft", legend = names(x), col = cols, lty = 1, 
+            lwd = lwd, pch = 1)
     }
 }
 ##' Mohn's rho for retrospective analysis
