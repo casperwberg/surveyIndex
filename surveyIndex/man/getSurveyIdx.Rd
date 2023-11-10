@@ -29,6 +29,7 @@ getSurveyIdx(
   predfix = NULL,
   linkZ = "logit",
   CIlevel = 0.95,
+  addTimeOfYear = FALSE,
   ...
 )
 }
@@ -72,6 +73,8 @@ getSurveyIdx(
 \item{linkZ}{link function for the binomial part of the model, default: "logit" (not used for Tweedie models).}
 
 \item{CIlevel}{Confidence interval level, defaults to 0.95.}
+
+\item{addTimeOfYear}{if TRUE, add predfix$timeOfYear to 'ctime' when standardizing (otherwise it is 1st of January).}
 
 \item{...}{Optional extra arguments to "gam"}
 

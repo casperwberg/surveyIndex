@@ -26,6 +26,7 @@
 ##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
 ##' @param linkZ link function for the binomial part of the model, default: "logit" (not used for Tweedie models).
 ##' @param CIlevel Confidence interval level, defaults to 0.95.
+##' @param addTimeOfYear if TRUE, add predfix$timeOfYear to 'ctime' when standardizing (otherwise it is 1st of January).
 ##' @param ... Optional extra arguments to "gam"
 ##' @return A survey index (list)
 ##' @examples
@@ -93,7 +94,7 @@
 ##' @export
 getSurveyIdx <-
     function(x,ages,myids,kvecP=rep(12*12,length(ages)),kvecZ=rep(8*8,length(ages)),gamma=1.4,cutOff=1,fam="Gamma",useBIC=FALSE,nBoot=1000,mc.cores=1,method="ML",predD=NULL,
-             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", CIlevel=0.95,...
+             modelZ=rep("Year+s(lon,lat,k=kvecZ[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),modelP=rep("Year+s(lon,lat,k=kvecP[a],bs='ts')+s(Ship,bs='re',by=dum)+s(Depth,bs='ts')+s(TimeShotHour,bs='cc')",length(ages)  ),knotsP=NULL,knotsZ=NULL,predfix=NULL,linkZ="logit", CIlevel=0.95,addTimeOfYear=FALSE,...
              ){
         
         if(is.null(x$Nage)) stop("No age matrix 'Nage' found.");
@@ -253,6 +254,11 @@ getSurveyIdx <-
                         predD[,n] = predfix[[n]]
                     }
                 }
+
+                if("timeOfYear" %in% names(predfix) && addTimeOfYear){
+                    predD$ctime = predD$ctime + predfix$timeOfYear
+                }
+                
                 p.1 <- p.0 <- NULL
                 try({
                     Xp.1=predict(m.pos,newdata=predD,type="lpmatrix");
@@ -377,10 +383,11 @@ getSurveyIdx <-
 ##' @param nBoot number of bootstrap samples used for calculating index confidence intervals
 ##' @param predfix optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)
 ##' @param mc.cores mc.cores number of cores for parallel processing
+##' @param addTimeOfYear if TRUE, add predfix$timeOfYear to 'ctime' when standardizing (otherwise it is 1st of January).
 ##' @return An object of class "surveyIdx"
 ##' @importFrom MASS mvrnorm
 ##' @export
-redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.cores=1){        
+redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.cores=1,addTimeOfYear=FALSE){        
     ages = as.numeric(colnames(model$idx))
     dataAges <- model$dataAges
     famVec = model$family
@@ -437,6 +444,9 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.
                 for(n in names(predfix)){
                     predD[,n] = predfix[[n]]
                 }
+            }
+            if("timeOfYear" %in% names(predfix) && addTimeOfYear){
+                    predD$ctime = predD$ctime + predfix$timeOfYear
             }
             p.1 <- p.0 <- NULL
             try({

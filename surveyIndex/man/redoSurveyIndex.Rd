@@ -11,7 +11,8 @@ redoSurveyIndex(
   myids,
   nBoot = 1000,
   predfix = list(),
-  mc.cores = 1
+  mc.cores = 1,
+  addTimeOfYear = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ redoSurveyIndex(
 \item{predfix}{optional named list of extra variables (besides Gear, HaulDur, Ship, and TimeShotHour),  that should be fixed during prediction step (standardized)}
 
 \item{mc.cores}{mc.cores number of cores for parallel processing}
+
+\item{addTimeOfYear}{if TRUE, add predfix$timeOfYear to 'ctime' when standardizing (otherwise it is 1st of January).}
 }
 \value{
 An object of class "surveyIdx"
