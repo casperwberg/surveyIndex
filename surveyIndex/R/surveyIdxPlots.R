@@ -20,6 +20,7 @@
 ##' @param restoreOldPar restore old par() on exit? Default=FALSE
 ##' @param mapBubbles boolean (default=FALSE) add observation bubbles?
 ##' @param cutp optional vector of break points for the color scale on maps
+##' @param map.pch pch for map points, default=16 (filled round).
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -27,7 +28,7 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL, ...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL,map.pch=16 ...) 
 {
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)
@@ -156,7 +157,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 box()
                 title(yy,line=1)
                 if(length(sel)==0) next;
-                points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=16,cex=map.cex)
+                points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=map.pch,cex=map.cex)
                 maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
                 if(mapBubbles){
                     dy = subset(dat,Year==yy)
