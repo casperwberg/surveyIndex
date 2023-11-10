@@ -28,7 +28,7 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL,map.pch=16 ...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL,map.pch=16, ...) 
 {
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)

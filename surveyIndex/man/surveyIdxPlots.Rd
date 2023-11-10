@@ -24,6 +24,7 @@ surveyIdxPlots(
   restoreOldPar = FALSE,
   mapBubbles = FALSE,
   cutp = NULL,
+  map.pch = 16,
   ...
 )
 }
@@ -65,6 +66,8 @@ surveyIdxPlots(
 \item{mapBubbles}{boolean (default=FALSE) add observation bubbles?}
 
 \item{cutp}{optional vector of break points for the color scale on maps}
+
+\item{map.pch}{pch for map points, default=16 (filled round).}
 
 \item{...}{Additional parameters for plot()}
 }
