@@ -113,10 +113,11 @@ leaveout.surveyIdx<-function(model,d,grid,fac,predD=NULL,...){
 ##' @param allCI show 95\% confidence lines for all indices? Default FALSE.
 ##' @param includeCI Show confidence intervals? Default TRUE.
 ##' @param ylim Y axis range. If NULL (default) then determine automatically.
+##' @param density if TRUE, divide each index by the number of grid points to get densities rather than totals.
 ##' @return nothing
 ##' @export
 plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL, 
-    allCI = FALSE, includeCI = TRUE, ylim = NULL){
+    allCI = FALSE, includeCI = TRUE, ylim = NULL, density=FALSE){
     if (class(base) == "surveyIdx") {
         x = c(list(base), x)
         base = 1
@@ -151,7 +152,9 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
         if(rescale){
             rsidx = which(rownames(x[[1]]$idx) %in% commonyears)
             ss <- mean(x[[1]]$idx[rsidx, aa], na.rm = TRUE)
-            
+        }
+        if(density){
+            ss <- length(x[[1]]$gPreds2[[1]][[1]])
         }
         rangevec = x[[1]]$idx[, aa] / ss
         if (nx > 1) {
@@ -159,6 +162,9 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
                 if(rescale){
                     rsidx = which(rownames(x[[xx]]$idx) %in% commonyears)
                     ss <- mean(x[[xx]]$idx[rsidx, aa], na.rm = TRUE)
+                }
+                if(density){
+                    ss <- length(x[[xx]]$gPreds2[[1]][[1]])
                 }
                 rangevec = c(rangevec, x[[xx]]$idx[,aa]/ss)
             }
@@ -169,6 +175,9 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
                     rsidx = which(rownames(x[[xx]]$idx) %in% commonyears)
                     ss <- mean(x[[xx]]$idx[rsidx, aa], na.rm = TRUE)
                 }
+                if(density){
+                    ss <- length(x[[xx]]$gPreds2[[1]][[1]])
+                }
                 rangevec = c(rangevec, x[[xx]]$lo[,aa]/ss, x[[xx]]$up[, aa]/ss)
             }
         }
@@ -177,7 +186,9 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
             rsidx = which(rownames(x[[base]]$idx) %in% commonyears)
             ssbase = mean(x[[base]]$idx[rsidx, aa], na.rm = TRUE)
         }
-        
+        if(density){
+            ssbase <- length(x[[base]]$gPreds2[[1]][[1]])
+        }
         if (!is.null(ylim)) 
             yl = ylim
         if (mainwasnull) 
@@ -193,6 +204,9 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
             if (rescale) {
                 rsidx = which(rownames(x[[i]]$idx) %in% commonyears)
                 ss = mean(x[[i]]$idx[rsidx, aa], na.rm = TRUE)
+            }
+            if(density){
+                ss <- length(x[[i]]$gPreds2[[1]][[1]])
             }
             lines(y, x[[i]]$idx[, aa]/ss, col = cols[i], type = "b", 
                 lwd = lwd)
