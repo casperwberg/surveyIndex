@@ -12,7 +12,8 @@
   main = NULL,
   allCI = FALSE,
   includeCI = TRUE,
-  ylim = NULL
+  ylim = NULL,
+  density = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@
 \item{includeCI}{Show confidence intervals? Default TRUE.}
 
 \item{ylim}{Y axis range. If NULL (default) then determine automatically.}
+
+\item{density}{if TRUE, divide each index by the number of grid points to get densities rather than totals.}
 }
 \value{
 nothing
