@@ -224,6 +224,13 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
     }
 }
 
+##' Plot estimates of factor levels (or random effects) from a GAM model.
+##' 
+##' @param x A model of class 'gam' or 'glm'
+##' @param name name of the factor
+##' @param invlink inverse link function
+##' @param levs optional custom factor level names 
+##' @param ... extra arguments to 'plot'
 ##' @export
 factorplot<-function(x, name, invlink=exp, levs=NULL,... ){
     sel<- grep( name, names(coef(x))) 
@@ -241,4 +248,42 @@ factorplot<-function(x, name, invlink=exp, levs=NULL,... ){
     plot( xs, invlink(est), ylim=ylims,...,xaxt="n",xlab="", ylab="Estimate")
     axis(1,labels=nams,at=xs)
     arrows( xs,lo,y1=hi,angle=90,code=3,length=0.1)
+}
+
+##' Calculate and plot the distribution as a function of depth
+##' 
+##' @title Calculate and plot the distribution as a function of depth
+##' @param m object of class 'surveyIdx'
+##' @param grid grid object used when fitting 'm'
+##' @param by depth bin size
+##' @param type character vector indicating what to plot. 'dist' or 'mean' or both.
+##' @param colfun color function to use for plotting.
+##' @param lwd plotting line width
+##' @param rangeFrac Fraction ]0;1[ indicating the percentile range in the mean plot. Default is 0.5, i.e. interquartile range.  
+##' @param ... extra arguments to 'plot
+##' @return a matrix with depth distribution in each year.
+##' @export
+depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c("red","lightgrey","blue")),lwd=1.5,rangeFrac=0.5,...){
+    gridd = cut(grid$Depth,breaks=seq(min(grid$Depth),max(grid$Depth),by=by))
+    dds = lapply(m$gPreds2,function(x) aggregate(x,by=list(gridd),FUN=mean))
+    ddsrs = t(t(dds[[1]][,-1])/colSums(dds[[1]][,-1]))
+    if("dist" %in% type){
+        cols = colfun(ncol(ddsrs))
+        matplot(ddsrs,type="l",lty=1,col=cols,axes=FALSE,xlab="Depth",ylab="Proportion",lwd=lwd,...)
+        axis(1,labels=levels(gridd),at=1:nrow(ddsrs))
+        axis(2)
+        box()
+        sel = seq(1,nrow(m$idx),length.out=min(nrow(m$idx),5))
+        legend("topright",lty=1,legend=rownames(m$idx)[sel],col=cols[sel],lwd=lwd)
+    }
+    if("mean" %in% type){
+        md = aggregate(grid$Depth~gridd,FUN=mean)
+        mdy = colSums(ddsrs*md[,2])
+        lo = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>rangeFrac/2) ),2]
+        hi = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>(1-rangeFrac/2) )),2]
+        plot(rownames(m$idx),mdy,type="p",pch=16,cex=1.5,ylab="Mean depth",xlab="Year",ylim=range(c(lo,hi)),col=cols)
+        arrows(as.numeric(rownames(m$idx)),y0=lo,y1=hi,code=3,angle=90,length=0.1,col=cols,lwd=lwd)
+        abline(h=mean(mdy),lty=2)
+    }
+    ddsrs
 }
