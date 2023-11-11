@@ -225,6 +225,58 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
     }
 }
 
+##' Plot values for each color level in a map as created by 'surveyIdxPlots'.
+##'
+##' @title Plot values for each color level in a map as created by 'surveyIdxPlots'.
+##' @param x object of class 'surveyIdx'
+##' @param year vector of years (should be the same as used for 'surveyIdxPlots')
+##' @param colors vector of colors to use
+##' @param age age group (integer >=1)
+##' @param legend.signif number of significant digits shown
+##' @param cutp optional custom vector of cut points for color scales.
+##' @param lwd line width for bars
+##' @param las orientation of x-axis lables
+##' @export
+mapLegend<-function(x,year,colors = rev(heat.colors(6)),age = 1,legend.signif=3,cutp = NULL,lwd=10,las=2){
+    colsel = "gPreds2"
+    a = age
+    goodyears = intersect(year,names(x[[colsel]][[a]])) 
+    
+    ally = data.frame(val = numeric(0), year = character(0))
+    cc=0
+    for(y in goodyears){
+        cc=cc+1
+        ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[cc]],
+                                      year=names(x[[colsel]][[a]])[cc] ))
+    }
+    ally$conc = surveyIndex:::concTransform(log(ally$val))
+    if(is.null(cutp)){
+        ally$zFac=cut( ally$conc,0:length(colors)/length(colors))
+    } else {
+        if(length(cutp) != length(colors) + 1) stop("incompatible number of colors and length of cutp") 
+        ally$zFac=cut( ally$val,cutp)
+    }
+    mvals = aggregate(val ~ zFac, data=ally, FUN=mean)
+    mm = mean(ally$val)
+    if(is.null(cutp)){
+        maxcuts = aggregate(val ~ zFac, data=ally, FUN=max)
+        mincuts = aggregate(val ~ zFac, data=ally, FUN=min)
+        ml = signif(mincuts[,2]/mm,legend.signif)
+        ml[1] = 0
+        leg = paste0("[",ml,",",signif(maxcuts[,2]/mm,legend.signif),"]")
+        plot(mvals[,2],type="h",lwd=lwd+lwd*0.1,col=1,axes=FALSE)
+        points(mvals[,2],type="h",lwd=lwd,col=colors)
+        axis(1,at=1:length(colors),labels=leg,las=las)
+    } else {
+        leg = levels(ally$zFac)
+        plot(mvals[,2],type="h",lwd=11,col=1,axes=FALSE)
+        points(mvals[,2],type="h",lwd=10,col=colors)
+        axis(1,at=1:length(colors),labels=leg,las=las)
+    }
+    
+}
+
+
 ##' Plot estimates of factor levels (or random effects) from a GAM model.
 ##' 
 ##' @param x A model of class 'gam' or 'glm'
