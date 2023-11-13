@@ -285,20 +285,20 @@ mapLegend<-function(x,year,colors = rev(heat.colors(6)),age = 1,legend.signif=3,
 ##' @param levs optional custom factor level names 
 ##' @param ... extra arguments to 'plot'
 ##' @export
-factorplot<-function(x, name, invlink=exp, levs=NULL,... ){
+factorplot<-function(x, name, invlink=exp, levs=NULL,ylim=NULL,... ){
     sel<- grep( name, names(coef(x))) 
     est <- coef(x)[ sel ]
     sds <- sqrt(diag( vcov(x) ))[ sel ]
     lo <- invlink(est - 2*sds)
     hi <- invlink(est + 2*sds)
-    ylims <- range(c(lo,hi))
+    if(is.null(ylim)) ylim <- range(c(lo,hi))
     xs <- 1:length(est)
 
     nams <- names(est)
     if(!is.null(levs)) nams <- levs
     op <- par(las=2)
     on.exit(par(op))
-    plot( xs, invlink(est), ylim=ylims,...,xaxt="n",xlab="", ylab="Estimate")
+    plot( xs, invlink(est), ylim=ylim,...,xaxt="n",xlab="", ylab="Estimate")
     axis(1,labels=nams,at=xs)
     arrows( xs,lo,y1=hi,angle=90,code=3,length=0.1)
 }
