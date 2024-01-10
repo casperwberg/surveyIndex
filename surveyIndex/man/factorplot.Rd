@@ -4,7 +4,7 @@
 \alias{factorplot}
 \title{Plot estimates of factor levels (or random effects) from a GAM model.}
 \usage{
-factorplot(x, name, invlink = exp, levs = NULL, ...)
+factorplot(x, name, invlink = exp, levs = NULL, ylim = NULL, ...)
 }
 \arguments{
 \item{x}{A model of class 'gam' or 'glm'}

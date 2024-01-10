@@ -317,9 +317,12 @@ factorplot<-function(x, name, invlink=exp, levs=NULL,ylim=NULL,... ){
 ##' @return a matrix with depth distribution in each year.
 ##' @export
 depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c("red","lightgrey","blue")),lwd=1.5,rangeFrac=0.5,...){
-    gridd = cut(grid$Depth,breaks=seq(min(grid$Depth),max(grid$Depth),by=by))
-    dds = lapply(m$gPreds2,function(x) aggregate(x,by=list(gridd),FUN=mean))
-    ddsrs = t(t(dds[[1]][,-1])/colSums(dds[[1]][,-1]))
+    br = seq(min(grid$Depth)-1,max(grid$Depth)+1,by=by)
+    gridd = cut(grid$Depth,breaks=br)
+    ##dds = lapply(m$gPreds2,function(x) aggregate(x,by=list(gridd),FUN=mean))
+    dds = lapply(m$gPreds2[[1]],function(x) xtabs(x ~ gridd)/sum(x))
+    ddsrs = do.call(cbind,dds)
+    
     if("dist" %in% type){
         cols = colfun(ncol(ddsrs))
         matplot(ddsrs,type="l",lty=1,col=cols,axes=FALSE,xlab="Depth",ylab="Proportion",lwd=lwd,...)
@@ -330,10 +333,10 @@ depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c(
         legend("topright",lty=1,legend=rownames(m$idx)[sel],col=cols[sel],lwd=lwd)
     }
     if("mean" %in% type){
-        md = aggregate(grid$Depth~gridd,FUN=mean)
-        mdy = colSums(ddsrs*md[,2])
-        lo = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>rangeFrac/2) ),2]
-        hi = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>(1-rangeFrac/2) )),2]
+        md = br[-1]+0.5 ##aggregate(grid$Depth~gridd,FUN=mean)
+        mdy = colSums(ddsrs*md)
+        lo = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>rangeFrac/2) )]
+        hi = md[apply( ddsrs,2,function(x) match(TRUE,cumsum(x)>(1-rangeFrac/2) ))]
         plot(rownames(m$idx),mdy,type="p",pch=16,cex=1.5,ylab="Mean depth",xlab="Year",ylim=range(c(lo,hi)),col=cols)
         arrows(as.numeric(rownames(m$idx)),y0=lo,y1=hi,code=3,angle=90,length=0.1,col=cols,lwd=lwd)
         abline(h=mean(mdy),lty=2)
