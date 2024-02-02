@@ -18,7 +18,7 @@ function(x,age=0,n=3,fun="mean"){
   cm.breaks<-attr(x,"cm.breaks")  
   f <- match.fun(fun)
   d=split(x,x$Year)
-  subsLength=f(x[[3]]$LngtCm,na.rm=TRUE)
+  subsLength=f(x[[1]]$LngtCm[x[[1]]$Age==age],na.rm=TRUE)
   for(y in 1:length(d)){
         nobs = sum(d[[y]][[1]]$Age==age,na.rm=TRUE)
         if(nobs<n) {
