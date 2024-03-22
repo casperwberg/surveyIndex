@@ -75,8 +75,11 @@ surveyIdx.simulate<-function(model,d,sampleFit=FALSE,condSim=NULL){
             shape = 1/model$pModels[[a]]$scale
             pos = rgamma(nrow(out),rate=shape/out.mu[[a]],shape=shape)
             out[,a] = pa*pos
+        } else if(famVec[a]=="negbin"){
+            if(!sampleFit && is.null(condSim)) out.mu[[a]] = predict(model$pModels[[a]],newdata=d[[2]],type="response")
+            size = model$pModels[[a]]$family$getTheta(TRUE)
+            out[,a] = rnbinom(length(out.mu[[a]]),size=size,mu=out.mu[[a]])
         }
-
     }
     list(sim=out,mu=out.mu,prob0=out.mu0)
 }
