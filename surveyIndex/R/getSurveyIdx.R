@@ -393,7 +393,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.
     famVec = model$family
     cutOff = model$cutOff
     
-    yearNum=model$yearNum
+    yearNum=as.numeric(as.character(x$Year)) 
     yearRange=min(yearNum):max(yearNum);
 
     gPreds=list() ##last data year's predictions
