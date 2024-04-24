@@ -229,8 +229,9 @@ getSurveyIdx <-
             upres=res;
             gp2=list()
             gp2.cv=list()
-            
-            for(y in levels(ddd$Year)){ 
+            cat("Predicting on grid for age ",age,"\n")
+            for(y in levels(ddd$Year)){
+                cat("Year ",y,"\n")
                 ## take care of years with all zeroes
                 if(!any(ddd$A1[ddd$Year==y]>cutOff)){
                     res[which(as.character(yearRange)==y)]=0;

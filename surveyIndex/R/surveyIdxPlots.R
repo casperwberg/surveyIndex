@@ -129,11 +129,9 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             goodyears = intersect(year,names(x[[colsel]][[a]])) 
             ## collect all years as data.frame
             ally = data.frame(val = numeric(0), year = character(0))
-            cc=0
             for(y in goodyears){
-                cc=cc+1
-                ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[cc]],
-                                              year=names(x[[colsel]][[a]])[cc] ))
+                ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[y]],
+                                              year=y))
             }
             ally$conc = surveyIndex:::concTransform(log(ally$val))
             if(is.null(cutp)){
@@ -243,11 +241,8 @@ mapLegend<-function(x,year,colors = rev(heat.colors(6)),age = 1,legend.signif=3,
     goodyears = intersect(year,names(x[[colsel]][[a]])) 
     
     ally = data.frame(val = numeric(0), year = character(0))
-    cc=0
     for(y in goodyears){
-        cc=cc+1
-        ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[cc]],
-                                      year=names(x[[colsel]][[a]])[cc] ))
+        ally = rbind(ally, data.frame(val=x[[colsel]][[a]][[y]],year=y))
     }
     ally$conc = surveyIndex:::concTransform(log(ally$val))
     if(is.null(cutp)){
@@ -313,14 +308,15 @@ factorplot<-function(x, name, invlink=exp, levs=NULL,ylim=NULL,... ){
 ##' @param colfun color function to use for plotting.
 ##' @param lwd plotting line width
 ##' @param rangeFrac Fraction ]0;1[ indicating the percentile range in the mean plot. Default is 0.5, i.e. interquartile range.  
+##' @param age which age group to plot
 ##' @param ... extra arguments to 'plot
 ##' @return a matrix with depth distribution in each year.
 ##' @export
-depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c("red","lightgrey","blue")),lwd=1.5,rangeFrac=0.5,...){
+depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c("red","lightgrey","blue")),lwd=1.5,rangeFrac=0.5,age=1,...){
     br = seq(min(grid$Depth)-1,max(grid$Depth)+1,by=by)
     gridd = cut(grid$Depth,breaks=br)
     ##dds = lapply(m$gPreds2,function(x) aggregate(x,by=list(gridd),FUN=mean))
-    dds = lapply(m$gPreds2[[1]],function(x) xtabs(x ~ gridd)/sum(x))
+    dds = lapply(m$gPreds2[[age]],function(x) xtabs(x ~ gridd)/sum(x))
     ddsrs = do.call(cbind,dds)
     
     if("dist" %in% type){

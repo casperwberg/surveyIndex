@@ -12,6 +12,7 @@ depthDist(
   colfun = colorRampPalette(c("red", "lightgrey", "blue")),
   lwd = 1.5,
   rangeFrac = 0.5,
+  age = 1,
   ...
 )
 }
@@ -29,6 +30,8 @@ depthDist(
 \item{lwd}{plotting line width}
 
 \item{rangeFrac}{Fraction ]0;1[ indicating the percentile range in the mean plot. Default is 0.5, i.e. interquartile range.}
+
+\item{age}{which age group to plot}
 
 \item{...}{extra arguments to 'plot}
 }
