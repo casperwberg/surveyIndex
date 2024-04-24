@@ -318,9 +318,8 @@ depthDist<-function(m,grid,by=5,type=c("dist","mean"),colfun=colorRampPalette(c(
     ##dds = lapply(m$gPreds2,function(x) aggregate(x,by=list(gridd),FUN=mean))
     dds = lapply(m$gPreds2[[age]],function(x) xtabs(x ~ gridd)/sum(x))
     ddsrs = do.call(cbind,dds)
-    
+    cols = colfun(ncol(ddsrs))
     if("dist" %in% type){
-        cols = colfun(ncol(ddsrs))
         matplot(ddsrs,type="l",lty=1,col=cols,axes=FALSE,xlab="Depth",ylab="Proportion",lwd=lwd,...)
         axis(1,labels=levels(gridd),at=1:nrow(ddsrs))
         axis(2)
