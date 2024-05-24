@@ -225,6 +225,7 @@ getSurveyIdx <-
             
             if(is.null(predD)) predD=subset(ddd,haul.id %in% myids);
             res=numeric(length(yearRange));
+            res[] <- NA
             lores=res;
             upres=res;
             gp2=list()
@@ -234,9 +235,9 @@ getSurveyIdx <-
                 cat("Year ",y,"\n")
                 ## take care of years with all zeroes
                 if(!any(ddd$A1[ddd$Year==y]>cutOff)){
-                    res[which(as.character(yearRange)==y)]=0;
-                    upres[which(as.character(yearRange)==y)] = 0;
-                    lores[which(as.character(yearRange)==y)] = 0;
+                    res[which(as.character(yearRange)==y)]=NA;
+                    upres[which(as.character(yearRange)==y)] = NA;
+                    lores[which(as.character(yearRange)==y)] = NA;
                     next;
                 }
                 if(is.list(predDc) && !class(predDc)%in%c("data.frame","DATRASraw")) predD = predDc[[as.character(y)]]
@@ -286,9 +287,9 @@ getSurveyIdx <-
                 });
                 ## take care of failing predictions
                 if(!is.numeric(p.1) | (!famVec[a] %in% c("Tweedie","negbin") && !is.numeric(p.0))) {
-                    res[which(as.character(yearRange)==y)]=0;
-                    upres[which(as.character(yearRange)==y)] = 0;
-                    lores[which(as.character(yearRange)==y)] = 0;
+                    res[which(as.character(yearRange)==y)]=NA;
+                    upres[which(as.character(yearRange)==y)] = NA;
+                    lores[which(as.character(yearRange)==y)] = NA;
                     next;
                 }
                 sig2=m.pos$sig2;

@@ -181,7 +181,7 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
                 rangevec = c(rangevec, x[[xx]]$lo[,aa]/ss, x[[xx]]$up[, aa]/ss)
             }
         }
-        yl = range(rangevec)
+        yl = range(rangevec,na.rm=TRUE)
         if(rescale){
             rsidx = which(rownames(x[[base]]$idx) %in% commonyears)
             ssbase = mean(x[[base]]$idx[rsidx, aa], na.rm = TRUE)
@@ -196,9 +196,10 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
         y = as.numeric(rownames(x[[base]]$idx))
         plot(y, x[[base]]$idx[, aa]/ssbase, type = "b", ylim = yl, 
             main = main, xlab = "Year", ylab = "Index")
-        if (includeCI) 
-            polygon(c(y, rev(y)), c(x[[base]]$lo[, aa], rev(x[[base]]$up[, 
-                aa]))/ssbase, col = "lightgrey", border = NA)
+        if (includeCI){ 
+            sel <- which(!is.na(x[[base]]$idx))
+            polygon(c(y[sel], rev(y[sel])), c(x[[base]]$lo[sel, aa], rev(x[[base]]$up[sel,aa]))/ssbase, col = "lightgrey", border = NA)
+        }
         for (i in 1:length(x)) {
             y = as.numeric(rownames(x[[i]]$idx))
             if (rescale) {
