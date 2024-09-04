@@ -21,6 +21,7 @@
 ##' @param mapBubbles boolean (default=FALSE) add observation bubbles?
 ##' @param cutp optional vector of break points for the color scale on maps
 ##' @param map.pch pch for map points, default=16 (filled round).
+##' @param mapArgs arguments to maps::map for drawing coastlines/land
 ##' @param ... Additional parameters for plot()
 ##' @return nothing
 ##' @export
@@ -28,8 +29,11 @@
 surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pModels), 
     select = c("index", "map", "residuals", "fitVsRes"), par = list(mfrow = c(3, 
         3)), colors = rev(heat.colors(6)), map.cex = 1, plotByAge = TRUE, 
-    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL,map.pch=16, ...) 
+    legend = TRUE, predD = NULL, year = NULL, main=NULL, legend.signif=3,legend.pos="topright",restoreOldPar=FALSE,mapBubbles=FALSE,cutp = NULL,map.pch=16,mapArgs=list(fill=TRUE,col=grey(0.5)),...) 
 {
+    xlims = range(dat$lon, na.rm = TRUE)
+    ylims = range(dat$lat, na.rm = TRUE)   
+    mapArgs <- c(list(database="worldHires",plot=TRUE,add=TRUE,xlim=xlims,ylim=ylims),mapArgs)
     if (!plotByAge & !is.null(par)){ 
         op<-par(par)
         if(restoreOldPar) on.exit(par(op))
@@ -73,8 +77,6 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                   1), col = c(2, 1), legend = c("alt.idx", "GAM"))
         }
         if (any(select == "map")) {
-            xlims = range(dat$lon, na.rm = TRUE)
-            ylims = range(dat$lat, na.rm = TRUE)
             mapvals = NULL
             if (is.null(predD)) {
                 tmp = subset(dat, haul.id %in% myids)
@@ -106,8 +108,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 ylab = "Latitude", main = main, ...)
             points(tmp$lon, y = tmp$lat, col = myCols[zFac], 
                 pch = 16, cex = map.cex[sFac])
-            maps::map("worldHires", xlim = xlims, ylim = ylims, 
-                fill = TRUE, plot = TRUE, add = TRUE, col = grey(0.5))
+            do.call(maps::map,mapArgs)
             if (legend){
                 maxcuts = aggregate(mapvals ~ zFac, FUN=max)
                 mincuts = aggregate(mapvals ~ zFac, FUN=min)
@@ -122,9 +123,6 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             if(is.null(year) || length(year)==0) stop("argument 'year' must be vector of length>=1 for type 'absolutemap'")
             if( !all(year %in% levels(dat$Year)) ) stop("invalid years selected")
             
-            xlims = range(dat$lon, na.rm = TRUE)
-            ylims = range(dat$lat, na.rm = TRUE)
-
             if(any(select == "absolutemap")) colsel = "gPreds2" else colsel = "gPreds2.CV" 
             goodyears = intersect(year,names(x[[colsel]][[a]])) 
             ## collect all years as data.frame
@@ -156,7 +154,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
                 title(yy,line=1)
                 if(length(sel)==0) next;
                 points(tmp$lon,y=tmp$lat,col=colors[as.numeric(ally$zFac[sel])],pch=map.pch,cex=map.cex)
-                maps::map('worldHires',xlim=xlims,ylim=ylims,fill=TRUE,plot=TRUE,add=TRUE,col=grey(0.5))
+                do.call(maps::map,mapArgs)
                 if(mapBubbles){
                     dy = subset(dat,Year==yy)
                     points(dy$lon,dy$lat,cex=sqrt(dy$Nage[,a]/bubbleScale))
@@ -210,8 +208,7 @@ surveyIdxPlots<-function (x, dat, alt.idx = NULL, myids, cols = 1:length(x$pMode
             sel <- which(dat[[2]]$Year == as.character(year))
             plot(dat$lon, dat$lat, type = "n", 
                 xlab = "Longitude", ylab = "Latitude", main = main,...)
-            maps::map("worldHires", fill = TRUE, plot = TRUE, 
-                add = TRUE, col = grey(0.5))
+            do.call(maps::map,mapArgs)
             positive = resi[sel] > 0
             points(dat$lon[sel][positive], dat$lat[sel][positive], 
                 pch = 1, cex = scale * sqrt(resi[sel][positive]), 

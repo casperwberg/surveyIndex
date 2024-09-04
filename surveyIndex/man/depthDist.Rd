@@ -8,7 +8,7 @@ depthDist(
   m,
   grid,
   by = 5,
-  type = c("dist", "mean"),
+  type = c("dist", "density", "mean"),
   colfun = colorRampPalette(c("red", "lightgrey", "blue")),
   lwd = 1.5,
   rangeFrac = 0.5,

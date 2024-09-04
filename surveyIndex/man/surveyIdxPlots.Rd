@@ -25,6 +25,7 @@ surveyIdxPlots(
   mapBubbles = FALSE,
   cutp = NULL,
   map.pch = 16,
+  mapArgs = list(fill = TRUE, col = grey(0.5)),
   ...
 )
 }
@@ -68,6 +69,8 @@ surveyIdxPlots(
 \item{cutp}{optional vector of break points for the color scale on maps}
 
 \item{map.pch}{pch for map points, default=16 (filled round).}
+
+\item{mapArgs}{arguments to maps::map for drawing coastlines/land}
 
 \item{...}{Additional parameters for plot()}
 }
