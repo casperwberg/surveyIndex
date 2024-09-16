@@ -197,7 +197,7 @@ plot.SIlist <- function (x, base = 1, rescale = FALSE, lwd = 1.5, main = NULL,
         plot(y, x[[base]]$idx[, aa]/ssbase, type = "b", ylim = yl, 
             main = main, xlab = "Year", ylab = "Index")
         if (includeCI){ 
-            sel <- which(!is.na(x[[base]]$idx))
+            sel <- which(!is.na(x[[base]]$idx[,aa]))
             polygon(c(y[sel], rev(y[sel])), c(x[[base]]$lo[sel, aa], rev(x[[base]]$up[sel,aa]))/ssbase, col = "lightgrey", border = NA)
         }
         for (i in 1:length(x)) {
