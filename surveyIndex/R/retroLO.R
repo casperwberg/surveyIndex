@@ -30,7 +30,7 @@ retro.surveyIdx<-function(model, d, grid,npeels=5,predD=NULL,nBoot=1000,...){
     lastY = max(model$yearNum)
     lastQ = max(as.numeric(as.character(d$Quarter[ d$Year == lastY ] )))
     yearRange = min(model$yearNum):max(model$yearNum)
-    yearRange = yearRange[ !is.na(SI$idx) ]
+    yearRange = yearRange[ !is.na(model$idx[,1]) ]
     ## Recreate formulae needed
     mp <- mz <- character(length(ages))
     for(aa in 1:length(ages)){
