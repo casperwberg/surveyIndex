@@ -32,13 +32,16 @@ getBathyGrid<-function(d,minDepth=10, maxDepth=Inf, resolution=2,maxDist=Inf, ke
     xyzbathy <- as.data.frame(xyzbathy)
     if (is.character(shapefile)) {
         if (file.exists(shapefile)) {
-            shape <- maptools::readShapeSpatial(shapefile)
+            shape <- sf::st_read(shapefile) 
+            shape <- as(shape,"Spatial")
         } else {
             stop("shapefile not found")
         }
         tmp <- xyzbathy
         sp::coordinates(tmp) <- ~lon + lat
+        sp::proj4string(tmp) <-  sp::proj4string(shape)        
         xtra <- sp::over(tmp, shape)
+        
         if (!is.null(select)) 
             xtra <- xtra[select]
         xyzbathy <- cbind(xyzbathy, xtra)
@@ -46,3 +49,4 @@ getBathyGrid<-function(d,minDepth=10, maxDepth=Inf, resolution=2,maxDist=Inf, ke
     
     xyzbathy
 }
+vignette("over")
