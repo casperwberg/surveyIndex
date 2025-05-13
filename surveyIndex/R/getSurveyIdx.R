@@ -529,7 +529,7 @@ redoSurveyIndex<-function(x,model,predD=NULL,myids,nBoot=1000,predfix=list(),mc.
                 return(list(res=idx,upres=quantile(idxSamp,1-halpha,na.rm=TRUE),lores=quantile(idxSamp,halpha,na.rm=TRUE),gp2=gPred,gp2.cv=gp.cv))
             }
         } ## rof years
-        yres = parallel::mclapply(levels(ddd$Year),do.one.y,mc.cores=mc.cores)
+        yres = parallel::mclapply(as.character(yearRange),do.one.y,mc.cores=mc.cores)
         for(y in levels(ddd$Year)) {
             ii = which(as.character(yearRange)==y) 
             res[ii] = yres[[ii]]$res
