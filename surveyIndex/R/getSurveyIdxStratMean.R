@@ -18,7 +18,9 @@ function(x,ageCols,doLog=FALSE){
         byRec=aggregate(log(ysplit[[y]][[2]]$Nage[,ageCols]+1),by=list(ysplit[[y]][[2]]$StatRec),FUN="mean")
       }
     
-    res[y,]=colMeans(byRec[,-1])
+    if(length(ageCols) == 1){
+      res[y,] = mean(byRec[,-1])
+    }else res[y,]=colMeans(byRec[,-1])
     }
   res
 }
